@@ -4,9 +4,15 @@
     <TargetFramework>net461</TargetFramework>
     <CodeAnalysisRuleSet>..\Solution.ruleset</CodeAnalysisRuleSet>
     <PackageOutputPath>C:\Dev\LocalPackages\Aikixd.CodeGeneration\</PackageOutputPath>
-    <Version>0.1.14-prerelease</Version>
+    <Version>0.1.15-prerelease</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
+    <Authors>Dmitriy Sorkin</Authors>
+    <Company>Dmitriy Sorkin</Company>
+    <Description>CSharp generation utilities.</Description>
+    <PackageLicenseUrl>https://github.com/aikixd/CodeGeneration/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/aikixd/CodeGeneration</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/aikixd/CodeGeneration</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
