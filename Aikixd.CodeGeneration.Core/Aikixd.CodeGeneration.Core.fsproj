@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <PackageOutputPath>C:\Dev\LocalPackages\Aikixd.CodeGeneration\</PackageOutputPath>
+    <Version>0.1.14-prerelease</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <Authors>Dmitriy Sorkin</Authors>
+    <Company />
+    <Product />
+    <Description>Helps to manage code generation within the solution.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Project.fs" />
+    <Compile Include="Analisys.fs" />
+    <Compile Include="Generator.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Update="FSharp.Core" Version="4.5.0" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net461</TargetFramework>
+    <CodeAnalysisRuleSet>..\Solution.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Roslynator.Analyzers" Version="1.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Aikixd.CodeGeneration.Core\Aikixd.CodeGeneration.Core.fsproj" />
+    <ProjectReference Include="..\Aikixd.CodeGeneration.CSharp\Aikixd.CodeGeneration.CSharp.csproj" />
+  </ItemGroup>
+
+</Project>
