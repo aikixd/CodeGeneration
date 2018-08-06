@@ -4,15 +4,19 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net461</TargetFramework>
     <CodeAnalysisRuleSet>..\Solution.ruleset</CodeAnalysisRuleSet>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Roslynator.Analyzers" Version="1.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.9.0-beta4-62809-06" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="2.9.0-beta4-62809-06" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Aikixd.CodeGeneration.Core\Aikixd.CodeGeneration.Core.fsproj" />
     <ProjectReference Include="..\Aikixd.CodeGeneration.CSharp\Aikixd.CodeGeneration.CSharp.csproj" />
+    <ProjectReference Include="..\Aikixd.CodeGeneration.Test.CSharp.Bridge\Aikixd.CodeGeneration.Test.CSharp.Bridge.csproj" />
   </ItemGroup>
-
+  
 </Project>

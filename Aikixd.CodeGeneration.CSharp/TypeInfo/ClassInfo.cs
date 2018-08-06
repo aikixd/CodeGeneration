@@ -89,7 +89,7 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
                 fields,
                 props,
                 methods,
-                symbol.GetAttributes().Select(AttributeInfo.Create));
+                symbol.GetAttributes().Select(AttributeInfo.Create).ToArray());
 
             AccessabilityInfo getAccessability(Accessibility access)
             {

@@ -4,7 +4,7 @@
     <TargetFramework>net461</TargetFramework>
     <CodeAnalysisRuleSet>..\Solution.ruleset</CodeAnalysisRuleSet>
     <PackageOutputPath>C:\Dev\LocalPackages\Aikixd.CodeGeneration\</PackageOutputPath>
-    <Version>0.1.15-prerelease</Version>
+    <Version>0.1.16-prerelease</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <Authors>Dmitriy Sorkin</Authors>
@@ -13,14 +13,18 @@
     <PackageLicenseUrl>https://github.com/aikixd/CodeGeneration/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/aikixd/CodeGeneration</PackageProjectUrl>
     <RepositoryUrl>https://github.com/aikixd/CodeGeneration</RepositoryUrl>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build" Version="15.7.179" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.Build.Locator" Version="1.0.18" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.7.179" ExcludeAssets="runtime" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.8.2" />
-    <PackageReference Include="Roslynator.Analyzers" Version="1.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="2.9.0-beta4-62809-06" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.9.0-beta4-62809-06" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="2.9.0-beta4-62809-06" />
+    <!--<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.8.2" />-->
   </ItemGroup>
 
   <ItemGroup>

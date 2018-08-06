@@ -2,7 +2,7 @@
 
 namespace Aikixd.CodeGeneration.Test.CSharp.Target.Standard
 {
-    [System.AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
+    [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     sealed class MyAttribute : Attribute
     {
         // See the attribute guidelines at 
@@ -36,7 +36,7 @@ namespace Aikixd.CodeGeneration.Test.CSharp.Target.Standard
     [Serializable]
     public class MyClass
     {
-        [My("str")]
+        //[My("str")]
         public bool boolean;
     }
 

@@ -54,6 +54,18 @@ namespace Aikixd.CodeGeneration.CSharp
         IEnumerable<IFeatureOccurence> FindOccurences(SemanticModel semanticModel);
     }
 
+    public sealed class ProgressReporter : IProgress<ProjectLoadProgress>
+    {
+        public void Report(ProjectLoadProgress value)
+        {
+            if (value.Operation == ProjectLoadOperation.Resolve)
+                Console.WriteLine($"Project {value.Operation}:\r\n\t{value.FilePath}\r\n\tframework: {value.TargetFramework}");
+
+            else
+                Console.WriteLine($"Project {value.Operation}:\r\n\t{value.FilePath}");
+        }
+    }
+
     public sealed class FeatureAnalyzer : IAnalyser
     {
         private readonly MSBuildWorkspace workspace;
@@ -67,8 +79,22 @@ namespace Aikixd.CodeGeneration.CSharp
 
             this.Features               = features;
 
-            this.workspace = MSBuildWorkspace.Create();
-            this.solution  = this.workspace.OpenSolutionAsync(solutionPath).Result;
+            var properties = new Dictionary<string, string>
+            {
+                // This property ensures that XAML files will be compiled in the current AppDomain
+                // rather than a separate one. Any tasks isolated in AppDomains or tasks that create
+                // AppDomains will likely not work due to https://github.com/Microsoft/MSBuildLocator/issues/16.
+                { "AlwaysCompileMarkupFilesInSeparateDomain", bool.FalseString }
+            };
+
+            this.workspace = MSBuildWorkspace.Create(properties);
+            this.workspace.WorkspaceFailed += Workspace_WorkspaceFailed;
+            this.solution  = this.workspace.OpenSolutionAsync(solutionPath, new ProgressReporter()).Result;
+        }
+
+        private void Workspace_WorkspaceFailed(object sender, WorkspaceDiagnosticEventArgs e)
+        {
+            Console.WriteLine($"Error: {e.Diagnostic.Message}");
         }
 
         public IEnumerable<IFeature> Features { get; }
@@ -85,13 +111,22 @@ namespace Aikixd.CodeGeneration.CSharp
                 this.solution
                     .Projects
                     .Where(this.projectFilter)
-                    .Select(prj => new { prj, nfos = prj.Documents.SelectMany(processDoc) });
+                    .Select(prj => new { prj, cmp = prj.GetCompilationAsync().Result, nfos = prj.Documents.SelectMany(processDoc) });
 
-            return occurs.Select(x => new ProjectGenerationInfo(x.prj.FilePath, x.nfos.ToArray())).ToArray();
+            return occurs.Select(x => {
+                var refs = x.cmp.References.ToArray();
+
+                return new ProjectGenerationInfo(x.prj.FilePath, x.nfos.ToArray()); }).ToArray();
 
             IEnumerable<FileGenerationInfo> processDoc(Document doc)
             {
-                return this.Features.SelectMany(feat => feat.FindOccurences(doc.GetSemanticModelAsync().Result)).Select(x => x.CreateGenerationInfo());
+                return this.Features
+                    .SelectMany(feat =>
+                        {
+                            var c = doc.Project.GetCompilationAsync().Result;
+                            return feat.FindOccurences(c.GetSemanticModel(doc.GetSyntaxTreeAsync().Result));
+                        })
+                    .Select(x => x.CreateGenerationInfo());
             }
         }
     }
