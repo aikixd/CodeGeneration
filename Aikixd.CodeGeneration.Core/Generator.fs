@@ -12,10 +12,7 @@
         abstract member GetProject : projectInfo : ProjectGenerationInfo -> IProjectExplorer
         abstract member Save : unit -> unit
 
-    type IFeatureExtractor =
-        abstract member FindFeatures : IProjectExplorer -> Feature list
-
-    type IAnalyser =
+    type IGenerationInfoSource =
         abstract member GenerateInfo : unit -> ProjectGenerationInfo seq
 
     type Generator 
@@ -52,30 +49,32 @@
         let generateForProject (projectNfo) =
             let project = solExplr.GetProject projectNfo
 
-            let excessFiles = getOldFiles <| project.GetGenerationPath generationRelativePath
+            project.GetGenerationPath generationRelativePath
+            |> getOldFiles 
+            |> Set.iter (removeFile project)
+                        
+            projectNfo.FileGeneration
+            |> Seq.map (createFile project)
 
-            excessFiles
-                |> Set.iter (removeFile project)
 
-            let excessFiles = 
-                projectNfo.FileGeneration
-                |> Seq.map (createFile project)
-                |> Seq.fold (fun set cur -> Set.remove cur set) excessFiles
-
-            ()
-
-        member x.Generate(projectNfos) =
+        let generate(projectNfos) =
             
-            projectNfos
-            |> Seq.iter generateForProject
+            let mapFn nfo = 
+                (nfo.Path, generateForProject nfo);
+            
+            let fs = 
+                projectNfos
+                |> Seq.map mapFn
                         
             solExplr.Save()
 
-        member x.Generate(analyzers : IAnalyser seq) =
+            fs
+
+        member x.Generate(analyzers : IGenerationInfoSource seq) =
             
-            let runOne (a : IAnalyser) =
+            let runOne (a : IGenerationInfoSource) =
                 a.GenerateInfo()
-                |> x.Generate
+                |> generate
                 ()
             
             analyzers

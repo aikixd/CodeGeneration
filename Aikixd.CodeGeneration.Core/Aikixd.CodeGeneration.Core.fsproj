@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <Compile Include="Project.fs" />
-    <Compile Include="Analisys.fs" />
     <Compile Include="Generator.fs" />
   </ItemGroup>
 

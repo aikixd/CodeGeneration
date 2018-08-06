@@ -66,18 +66,18 @@ namespace Aikixd.CodeGeneration.CSharp
         }
     }
 
-    public sealed class FeatureAnalyzer : IAnalyser
+    public sealed class FeatureInfoSource : IGenerationInfoSource
     {
         private readonly MSBuildWorkspace workspace;
         private readonly Solution solution;
 
         private Func<Project, bool> projectFilter;
 
-        public FeatureAnalyzer(string solutionPath, IEnumerable<IFeature> features)
+        public FeatureInfoSource(string solutionPath, IEnumerable<IFeature> features)
         {
             this.projectFilter = _ => true;
 
-            this.Features               = features;
+            this.Features      = features;
 
             var properties = new Dictionary<string, string>
             {

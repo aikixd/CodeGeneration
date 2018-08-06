@@ -11,9 +11,9 @@ using System.Linq;
 
 namespace Aikixd.CodeGeneration.Test.CSharp
 {
-    
 
-    internal sealed class DefinitionAnalyzer : IAnalyser
+
+    internal sealed class DefinitionAnalyzer : IGenerationInfoSource
     {
         public IEnumerable<ProjectGenerationInfo> GenerateInfo()
         {
@@ -21,14 +21,12 @@ namespace Aikixd.CodeGeneration.Test.CSharp
         }
     }
 
-    
+
     [Serializable]
     class Program
     {
         static void Main(string[] args)
         {
-            if (InitMsBuild() == false)
-                return;
             Run();
         }
 
@@ -36,7 +34,7 @@ namespace Aikixd.CodeGeneration.Test.CSharp
         {
             var generator = new Generator("AutoGen", new CSharpSolutionExplorer());
 
-            var analyzers = new FeatureAnalyzer(
+            var analyzers = new FeatureInfoSource(
                 @"C:\Dev\Aikixd.CodeGeneration\Aikixd.CodeGeneration.TestSolution.sln",
                 new IFeature[] {
                     //new AttributeFeature<SerializableAttribute>("serialized", x => $"generated {x.Name}."),
@@ -55,43 +53,5 @@ namespace Aikixd.CodeGeneration.Test.CSharp
             return $"Generated for {x.Name}";
         }
 
-        static bool InitMsBuild()
-        {
-            //MSBuildLocator.RegisterDefaults();
-
-            var instances = MSBuildLocator.QueryVisualStudioInstances().ToArray();
-            if (instances.Length == 0)
-            {
-                Console.WriteLine("No MSBuild instances found.");
-                return false;
-            }
-
-            Console.WriteLine("The following MSBuild instances have benen discovered:");
-            Console.WriteLine(string.Empty);
-
-            for (int i = 0; i < instances.Length; i++)
-            {
-                var inst = instances[i];
-                Console.WriteLine($"    {i + 1}. {inst.Name} ({inst.Version})");
-            }
-
-            Console.WriteLine(string.Empty);
-
-            var instance = instances[0];
-            
-
-            MSBuildLocator.RegisterInstance(instance);
-
-            Console.WriteLine("Registered first MSBuild instance:");
-            Console.WriteLine(string.Empty);
-            Console.WriteLine($"    Name: {instance.Name}");
-            Console.WriteLine($"    Version: {instance.Version}");
-            Console.WriteLine($"    VisualStudioRootPath: {instance.VisualStudioRootPath}");
-            Console.WriteLine($"    MSBuildPath: {instance.MSBuildPath}");
-            Console.WriteLine(string.Empty);
-            
-
-            return true;
-        }
     }
 }
