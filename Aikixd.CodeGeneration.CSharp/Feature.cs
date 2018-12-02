@@ -42,7 +42,7 @@ namespace Aikixd.CodeGeneration.CSharp
                 this.symbol.Name,
                 this.symbol.ContainingNamespace.ToDisplayString(),
                 this.feature.Modifier,
-                ".cs",
+                "cs",
                 this.generateCodeFn(this.symbol));
         }
     }
@@ -111,7 +111,10 @@ namespace Aikixd.CodeGeneration.CSharp
                 this.solution
                     .Projects
                     .Where(this.projectFilter)
-                    .Select(prj => new { prj, cmp = prj.GetCompilationAsync().Result, nfos = prj.Documents.SelectMany(processDoc) });
+                    .Select(prj => new {
+                        prj,
+                        cmp = prj.GetCompilationAsync().Result,
+                        nfos = prj.Documents.SelectMany(processDoc) });
 
             return occurs.Select(x => {
                 var refs = x.cmp.References.ToArray();

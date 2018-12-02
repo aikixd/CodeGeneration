@@ -47,8 +47,17 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
             return new AttributeInfo(
                 TypeInfo.FromSymbol(attributeData.AttributeClass),
                 MethodInfo.FromSymbol(attributeData.AttributeConstructor),
-                attributeData.ConstructorArguments.Select(x => x.Value).ToArray(),
+                attributeData.ConstructorArguments.Select(getPassedArg).ToArray(),
                 attributeData.NamedArguments.ToDictionary(x => x.Key, x => x.Value.Value));
+
+            object getPassedArg(TypedConstant arg)
+            {
+                if (arg.Kind == TypedConstantKind.Array)
+                    return arg.Values.Select(getPassedArg).ToArray();
+
+                else
+                    return arg.Value;
+            }
         }
     }
 }

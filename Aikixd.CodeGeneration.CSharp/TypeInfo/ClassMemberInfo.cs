@@ -122,7 +122,7 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
             }
             catch (Exception e)
             {
-                throw new InvalidOperationException("Could not create method info. See inner exception for details.", e);
+                throw new InvalidOperationException($"Could not create method info for {{{symbol}}}. See inner exception for details.", e);
             }
         }
     }

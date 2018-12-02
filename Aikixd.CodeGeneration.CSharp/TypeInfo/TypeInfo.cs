@@ -7,17 +7,26 @@ using System.Threading.Tasks;
 
 namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 {
+    public enum TypeKind
+    {
+        Object,
+        Array
+    }
+
     public sealed class TypeInfo : IEquatable<TypeInfo>
     {
         public string Name { get; }
         public string Namespace { get; }
+        public TypeKind Kind { get; }
 
         public TypeInfo(
             string name,
-            string @namespace)
+            string @namespace,
+            TypeKind kind)
         {
             this.Name = name;
             this.Namespace = @namespace;
+            this.Kind = kind;
         }
 
         public bool Equals(TypeInfo other)
@@ -49,7 +58,15 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 
         public static TypeInfo FromSymbol(ITypeSymbol symbol)
         {
-            return new TypeInfo(symbol.Name, symbol.ContainingNamespace.ToDisplayString());
+            if (symbol.Kind == SymbolKind.ArrayType)
+            {
+                var arrSymbol = (IArrayTypeSymbol)symbol;
+                var elemType = arrSymbol.ElementType;
+
+                return new TypeInfo(elemType.Name, elemType.ContainingNamespace.ToDisplayString(), TypeKind.Array);
+            }
+
+            return new TypeInfo(symbol.Name, symbol.ContainingNamespace.ToDisplayString(), TypeKind.Object);
         }
     }
 }

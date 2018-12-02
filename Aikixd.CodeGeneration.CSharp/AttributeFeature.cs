@@ -39,7 +39,11 @@ namespace Aikixd.CodeGeneration.CSharp
                         return str == typeof(TAttribute).FullName;
                     });
                     })
-                .Select(x => new ClassFeatureOccurence(this, (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(x), x, this.generateCodeFn))
+                .Select(x => new ClassFeatureOccurence(
+                    this, 
+                    (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(x), 
+                    x, 
+                    this.generateCodeFn))
                 .ToArray();
         }
     }

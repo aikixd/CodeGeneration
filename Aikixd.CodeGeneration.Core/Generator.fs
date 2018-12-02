@@ -38,7 +38,7 @@
 
             project.CreateFile path genNfo.Contents
 
-            path
+            ()
 
         let removeFile (project : IProjectExplorer) path =
             
@@ -54,7 +54,9 @@
             |> Set.iter (removeFile project)
                         
             projectNfo.FileGeneration
-            |> Seq.map (createFile project)
+            |> Seq.iter (createFile project)
+
+            ()
 
 
         let generate(projectNfos) =
@@ -65,17 +67,24 @@
             let fs = 
                 projectNfos
                 |> Seq.map mapFn
+                |> Seq.toArray
+                |> ignore
                         
             solExplr.Save()
 
             fs
 
-        member x.Generate(analyzers : IGenerationInfoSource seq) =
+        member x.Generate(nfos : ProjectGenerationInfo seq) =
             
-            let runOne (a : IGenerationInfoSource) =
-                a.GenerateInfo()
-                |> generate
-                ()
+            // In case when the same project will have multiple occurances
+            // combine all the file generation info under one project.
+            // Otherwize different instances of the infos will step in each
+            // other's toes down the line.
+            nfos
+            |> Seq.groupBy (fun x -> x.Path)
+            |> Seq.map (fun (p, ns) -> (p, Seq.map (fun x -> x.FileGeneration) ns ))
+            |> Seq.map (fun (p, fss) -> (p, Seq.concat fss))
+            |> Seq.map (fun (p, fs) -> { Path = p
+                                         FileGeneration = fs })
+            |> generate
             
-            analyzers
-            |> Seq.iter runOne

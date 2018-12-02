@@ -28,4 +28,12 @@ namespace Aikixd.CodeGeneration.Test.CSharp.Bridge
             this.i = i;
         }
     }
+
+    [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    public sealed class ArrayArgAttribute : Attribute
+    {
+        public ArrayArgAttribute(params string[] arr)
+        {
+        }
+    }
 }
