@@ -1,5 +1,6 @@
 ﻿using Aikixd.CodeGeneration.Core;
 using Aikixd.CodeGeneration.CSharp;
+using Aikixd.CodeGeneration.CSharp.SearchPatterns;
 using Aikixd.CodeGeneration.CSharp.TypeInfo;
 using Aikixd.CodeGeneration.Test.CSharp.Bridge;
 using Microsoft.Build.Locator;
@@ -37,28 +38,67 @@ namespace Aikixd.CodeGeneration.Test.CSharp
 
             var analyzers = new FeatureInfoSource(
                 @"C:\Dev\Aikixd.CodeGeneration\Aikixd.CodeGeneration.TestSolution.sln",
-                new IFeature[] {
-                    new AttributeFeature<SerializableAttribute>("serialized", TestSymbol),
-                    new AttributeFeature<TypeTestAttribute>("type.test", TestSymbol),
-                    new AttributeFeature<ArrayArgAttribute>("arrayarg", ArrayArgTest)
+                
+                new IFeatureQuery[] {
+                    new TypeQuery(
+                        new TypeAttributeSearchPattern<SerializableAttribute>(),
+                        new TypeGeneration("serialized", TestSerialized)),
+
+                    new TypeQuery(
+                        new TypeAttributeSearchPattern<TypeTestAttribute>(),
+                        new TypeGeneration("typetest", TestSymbol)),
+                    
+                    new TypeQuery(
+                        new TypeAttributeSearchPattern<ArrayArgAttribute>(),
+                        new TypeGeneration("arrayarg", TestArrayArg)),
+
+                    new TypeQuery(
+                        new TypeAttributeSearchPattern<CombinedAttribute>(),
+                        new [] {
+                            new TypeGeneration("combined.serializzed", TestSerialized),
+                            new TypeGeneration("combined.arrayarg", TestArrayArg)
+                        })
                 });
 
-            //analyzers.ProjectFilter = x => x.Name == "Aikixd.CodeGeneration.Test.CSharp.Target.Standard";
+            var nfos = analyzers.GenerateInfo();
 
-            generator.Generate(analyzers.GenerateInfo());
+            generator.Generate(nfos);
         }
 
         static string TestSymbol(INamedTypeSymbol x)
         {
             var classNfo = ClassInfo.FromSymbol(x);
 
-            return $"Generated for {x.Name}";
+            var members = string.Join(", ", ClassInfo.FromSymbol(x).Fields.Select(y => y.Name));
+
+            return $"// Generated for {x.Name}\r\n{members}";
         }
 
-
-        static string ArrayArgTest(INamedTypeSymbol x)
+        static string TestSerialized(INamedTypeSymbol x)
         {
             var nfo = ClassInfo.FromSymbol(x);
+
+            if (nfo.Name != "DecorationWithSerializable")
+                return getText(nfo);
+
+            var attr = nfo.Attributes.First();
+
+            Debug.Assert(attr.Type.Name == "SerializableAttribute");
+
+            return getText(nfo);
+
+            string getText(ClassInfo i)
+            {
+                return $"// Serialized test. Class name: {i.Name}.";
+            }
+        }
+
+        static string TestArrayArg(INamedTypeSymbol x)
+        {
+            var nfo = ClassInfo.FromSymbol(x);
+
+            if (nfo.Name != "DecorationWithArrayType")
+                return getText(nfo);
 
             Debug.Assert(nfo.Attributes.Count() == 1);
 
@@ -69,7 +109,12 @@ namespace Aikixd.CodeGeneration.Test.CSharp
 
             Debug.Assert((attr.PassedArguments.First() as object[]).SequenceEqual(new[] { "one", "two" }));
 
-            return nfo.Name;
+            return getText(nfo);
+
+            string getText(ClassInfo i)
+            {
+                return $"// Attribute array argument test. Class name: {i.Name}.";
+            }
         }
 
     }

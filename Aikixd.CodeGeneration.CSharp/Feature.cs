@@ -13,59 +13,11 @@ using System.Threading.Tasks;
 
 namespace Aikixd.CodeGeneration.CSharp
 {
-    public interface IFeatureOccurence
-    {
-        FileGenerationInfo CreateGenerationInfo();
-    }
-
-    sealed class ClassFeatureOccurence : IFeatureOccurence
-    {
-        private readonly IFeature feature;
-        private readonly INamedTypeSymbol symbol;
-        private readonly ClassDeclarationSyntax syntax;
-        private readonly Func<INamedTypeSymbol, string> generateCodeFn;
-
-
-        public ClassFeatureOccurence(IFeature feature, INamedTypeSymbol symbol, ClassDeclarationSyntax syntax, Func<INamedTypeSymbol, string> generateCodeFn)
-        {
-            this.feature = feature;
-            this.symbol  = symbol ?? throw new ArgumentNullException(nameof(symbol));
-            this.syntax  = syntax ?? throw new ArgumentNullException(nameof(syntax));
-            this.generateCodeFn = generateCodeFn ?? throw new ArgumentNullException(nameof(generateCodeFn));
-        }
-
-        public FileGenerationInfo CreateGenerationInfo()
-        {
-            //var classInfo = ClassInfo.FromSymbol(this.symbol);
-
-            return new FileGenerationInfo(
-                this.symbol.Name,
-                this.symbol.ContainingNamespace.ToDisplayString(),
-                this.feature.Modifier,
-                "cs",
-                this.generateCodeFn(this.symbol));
-        }
-    }
-
-    public interface IFeature
-    {
-        string Modifier { get; }
-
-        IEnumerable<IFeatureOccurence> FindOccurences(SemanticModel semanticModel);
-    }
-
-    public sealed class ProgressReporter : IProgress<ProjectLoadProgress>
-    {
-        public void Report(ProjectLoadProgress value)
-        {
-            if (value.Operation == ProjectLoadOperation.Resolve)
-                Console.WriteLine($"Project {value.Operation}:\r\n\t{value.FilePath}\r\n\tframework: {value.TargetFramework}");
-
-            else
-                Console.WriteLine($"Project {value.Operation}:\r\n\t{value.FilePath}");
-        }
-    }
-
+    /// <summary>
+    /// Looks for features in the source code provided in the constructor
+    /// and generates the <see cref="FileGenerationInfo"/> based on the found
+    /// occurences.
+    /// </summary>
     public sealed class FeatureInfoSource : IGenerationInfoSource
     {
         private readonly MSBuildWorkspace workspace;
@@ -73,11 +25,13 @@ namespace Aikixd.CodeGeneration.CSharp
 
         private Func<Project, bool> projectFilter;
 
-        public FeatureInfoSource(string solutionPath, IEnumerable<IFeature> features)
+        private readonly IEnumerable<IFeatureQuery> queries;
+
+        public FeatureInfoSource(string solutionPath, IEnumerable<IFeatureQuery> queries)
         {
             this.projectFilter = _ => true;
 
-            this.Features      = features;
+            this.queries = queries;
 
             var properties = new Dictionary<string, string>
             {
@@ -97,8 +51,9 @@ namespace Aikixd.CodeGeneration.CSharp
             Console.WriteLine($"Error: {e.Diagnostic.Message}");
         }
 
-        public IEnumerable<IFeature> Features { get; }
-
+        /// <summary>
+        /// The filter that determines in which projects to look for features.
+        /// </summary>
         public Func<Project, bool> ProjectFilter
         {
             get => this.projectFilter;
@@ -116,20 +71,19 @@ namespace Aikixd.CodeGeneration.CSharp
                         cmp = prj.GetCompilationAsync().Result,
                         nfos = prj.Documents.SelectMany(processDoc) });
 
-            return occurs.Select(x => {
-                var refs = x.cmp.References.ToArray();
-
-                return new ProjectGenerationInfo(x.prj.FilePath, x.nfos.ToArray()); }).ToArray();
+            return 
+                occurs
+                .Select(x => new ProjectGenerationInfo(x.prj.FilePath, x.nfos.ToArray()))
+                .ToArray();
 
             IEnumerable<FileGenerationInfo> processDoc(Document doc)
             {
-                return this.Features
-                    .SelectMany(feat =>
-                        {
-                            var c = doc.Project.GetCompilationAsync().Result;
-                            return feat.FindOccurences(c.GetSemanticModel(doc.GetSyntaxTreeAsync().Result));
-                        })
-                    .Select(x => x.CreateGenerationInfo());
+                return this.queries
+                    .SelectMany(query =>
+                    {
+                        var c = doc.Project.GetCompilationAsync().Result;
+                        return query.Execute(c.GetSemanticModel(doc.GetSyntaxTreeAsync().Result));
+                    });
             }
         }
     }
