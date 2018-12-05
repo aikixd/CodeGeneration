@@ -1,1 +1,1 @@
-// Serialized test. Class name: DecorationWithSerializable.
+// Serialized test. Class name: Aikixd.CodeGeneration.Test.CSharp.Target.Standard.DecorationWithSerializable.

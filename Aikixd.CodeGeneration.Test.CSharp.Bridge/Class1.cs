@@ -44,4 +44,19 @@ namespace Aikixd.CodeGeneration.Test.CSharp.Bridge
         {
         }
     }
+
+    [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    public sealed class DetectAttribute : Attribute
+    {
+        public DetectAttribute()
+        {
+        }
+    }
+
+    [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    public sealed class TypeAttribute : Attribute
+    {
+        public TypeAttribute(Type type)
+        { }
+    }
 }

@@ -45,12 +45,16 @@ namespace Aikixd.CodeGeneration.Test.CSharp
                         new TypeGeneration("serialized", TestSerialized)),
 
                     new TypeQuery(
-                        new TypeAttributeSearchPattern<TypeTestAttribute>(),
-                        new TypeGeneration("typetest", TestSymbol)),
+                        new TypeAttributeSearchPattern<DetectAttribute>(),
+                        new TypeGeneration("detect", TestSymbol)),
                     
                     new TypeQuery(
                         new TypeAttributeSearchPattern<ArrayArgAttribute>(),
                         new TypeGeneration("arrayarg", TestArrayArg)),
+
+                    new TypeQuery(
+                        new TypeAttributeSearchPattern<TypeAttribute>(),
+                        new TypeGeneration("type", TestType)),
 
                     new TypeQuery(
                         new TypeAttributeSearchPattern<CombinedAttribute>(),
@@ -62,16 +66,30 @@ namespace Aikixd.CodeGeneration.Test.CSharp
 
             var nfos = analyzers.GenerateInfo();
 
+            var g =
+                nfos
+                .SelectMany(x => x.FileGeneration)
+                .GroupBy(x => x.Name + "." + x.Modifier);
+
+            if (g.Any(x => x.Count() > 1))
+            {
+                var group = g.First(x => x.Count() > 1);
+                var allGroups = g.Where(x => x.Count() > 1).ToArray();
+                Debug.Fail($"More than one generation exist for file {group.Key}.");
+            }
+
             generator.Generate(nfos);
         }
 
         static string TestSymbol(INamedTypeSymbol x)
         {
-            var classNfo = ClassInfo.FromSymbol(x);
+            var nfo = ClassInfo.FromSymbol(x);
 
             var members = string.Join(", ", ClassInfo.FromSymbol(x).Fields.Select(y => y.Name));
 
-            return $"// Generated for {x.Name}\r\n{members}";
+            return $"namespace {nfo.Namespace} {{" +
+                $"partial class {x.Name} {{ string test; }}" +
+                $"}}";
         }
 
         static string TestSerialized(INamedTypeSymbol x)
@@ -89,7 +107,7 @@ namespace Aikixd.CodeGeneration.Test.CSharp
 
             string getText(ClassInfo i)
             {
-                return $"// Serialized test. Class name: {i.Name}.";
+                return $"// Serialized test. Class name: {i.FullName}.";
             }
         }
 
@@ -117,5 +135,25 @@ namespace Aikixd.CodeGeneration.Test.CSharp
             }
         }
 
+        static string TestType(Compilation c, INamedTypeSymbol x)
+        {
+            var nfo = ClassInfo.FromSymbol(x);
+            var cNfo = CompilationInfo.FromCompilation(c);
+
+            var attr = nfo.Attributes.First();
+
+            Debug.Assert(
+                ((CodeGeneration.CSharp.TypeInfo.TypeInfo)attr.PassedArguments[0]).FullName ==
+                "System.IEquatable<Aikixd.CodeGeneration.Test.CSharp.Target.Standard.DecorationWithType>");
+
+            var eqNfo = ((CodeGeneration.CSharp.TypeInfo.TypeInfo)attr.PassedArguments[0]).AsInterface();
+
+            return getText(nfo);
+
+            string getText(ClassInfo i)
+            {
+                return $"// Attribute array argument test. Class name: {i.Name}. TypeArg: {((CodeGeneration.CSharp.TypeInfo.TypeInfo)attr.PassedArguments[0]).FullName}";
+            }
+        }
     }
 }

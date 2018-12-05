@@ -2,10 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 {
-    public sealed class ClassInfo
+    public sealed class InterfaceInfo
     {
         public TypeInfo TypeInfo { get; }
         public string Name => this.TypeInfo.Name;
@@ -14,49 +16,33 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 
         public AccessabilityInfo Accessabilty { get; }
 
-        public bool IsStatic { get; }
-        public bool IsSealed { get; }
-
-        public IEnumerable<MemberInfo>         Members { get; }
-        public IEnumerable<FieldMemberInfo>    Fields { get; }
+        public IEnumerable<MemberInfo> Members { get; }
         public IEnumerable<PropertyMemberInfo> Properties { get; }
-        public IEnumerable<MethodInfo>   Methods { get; }
+        public IEnumerable<MethodInfo> Methods { get; }
 
         public IEnumerable<AttributeInfo> Attributes { get; }
 
-        public ClassInfo(
+        private InterfaceInfo(
             TypeInfo typeInfo,
-            bool isStatic,
-            bool isSealed,
             AccessabilityInfo accessabilty,
-            IEnumerable<FieldMemberInfo>    fields,
             IEnumerable<PropertyMemberInfo> properties,
-            IEnumerable<MethodInfo>         methods,
-            IEnumerable<AttributeInfo>      attributes)
+            IEnumerable<MethodInfo> methods,
+            IEnumerable<AttributeInfo> attributes)
         {
-            this.TypeInfo = typeInfo;
-
-            this.IsStatic = isStatic;
-            this.IsSealed = isSealed;
-
+            this.TypeInfo     = typeInfo;
             this.Accessabilty = accessabilty;
-
-            this.Attributes = attributes ?? throw new ArgumentNullException(nameof(attributes));
-
-            this.Fields     = fields     ?? throw new ArgumentNullException(nameof(fields));
-            this.Properties = properties ?? throw new ArgumentNullException(nameof(properties));
-            this.Methods    = methods    ?? throw new ArgumentNullException(nameof(methods));
+            this.Properties   = properties;
+            this.Methods      = methods;
+            this.Attributes   = attributes;
 
             this.Members =
-                this.Properties
+                properties
                 .Cast<MemberInfo>()
-                .Union(this.Methods)
-                .Union(this.Fields);
+                .Union(methods);
         }
 
-        public static ClassInfo FromSymbol(INamedTypeSymbol symbol)
+        public static InterfaceInfo FromSymbol(INamedTypeSymbol symbol)
         {
-            var fields = new LinkedList<FieldMemberInfo>();
             var props = new LinkedList<PropertyMemberInfo>();
             var methods = new LinkedList<MethodInfo>();
 
@@ -64,11 +50,6 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
             {
                 switch (s.Kind)
                 {
-                    case SymbolKind.Field:
-                        if (s.CanBeReferencedByName)
-                            fields.AddLast(FieldMemberInfo.FromSymbol((IFieldSymbol)s));
-                        break;
-                        
                     case SymbolKind.Property:
                         props.AddLast(PropertyMemberInfo.FromSymbol((IPropertySymbol)s));
                         break;
@@ -80,12 +61,9 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
                 }
             }
 
-            return new ClassInfo(
+            return new InterfaceInfo(
                 TypeInfo.FromSymbol(symbol),
-                symbol.IsStatic,
-                symbol.IsSealed,
                 getAccessability(symbol.DeclaredAccessibility),
-                fields,
                 props,
                 methods,
                 symbol.GetAttributes().Select(AttributeInfo.Create).ToArray());
@@ -113,7 +91,7 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
                         return AccessabilityInfo.Protected | AccessabilityInfo.Internal;
 
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(access), $"Class accessability {access.ToString()} is not supported.");
+                        throw new ArgumentOutOfRangeException(nameof(access), $"Interface accessability {access.ToString()} is not supported.");
                 }
             }
         }

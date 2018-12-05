@@ -66,25 +66,30 @@ namespace Aikixd.CodeGeneration.CSharp
                 this.solution
                     .Projects
                     .Where(this.projectFilter)
-                    .Select(prj => new {
+                    .Select(prj => new
+                    {
                         prj,
-                        cmp = prj.GetCompilationAsync().Result,
-                        nfos = prj.Documents.SelectMany(processDoc) });
+                        cmp = prj.GetCompilationAsync().Result
+                    })
+                    .Select(x => new
+                    {
+                        x.prj,
+                        nfos = this.queries.SelectMany(q =>
+                            q.Execute(x.prj, x.cmp))
+                    });
+                        
+                    //)
+                    //.Select(prj => new {
+                    //    prj,
+                    //    cmp = prj.GetCompilationAsync().Result.GlobalNamespace.gett,
+                    //    nfos = prj.Documents.SelectMany(processDoc) });
 
             return 
                 occurs
                 .Select(x => new ProjectGenerationInfo(x.prj.FilePath, x.nfos.ToArray()))
                 .ToArray();
-
-            IEnumerable<FileGenerationInfo> processDoc(Document doc)
-            {
-                return this.queries
-                    .SelectMany(query =>
-                    {
-                        var c = doc.Project.GetCompilationAsync().Result;
-                        return query.Execute(c.GetSemanticModel(doc.GetSyntaxTreeAsync().Result));
-                    });
-            }
         }
+
+        
     }
 }

@@ -53,10 +53,21 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
             object getPassedArg(TypedConstant arg)
             {
                 if (arg.Kind == TypedConstantKind.Array)
-                    return arg.Values.Select(getPassedArg).ToArray();
+                    return arg.Values.Select(getPassedArg).Select(transformArg).ToArray();
 
                 else
-                    return arg.Value;
+                    return transformArg(arg.Value);
+            }
+
+            object transformArg(object arg)
+            {
+                if (arg.GetType().IsPrimitive)
+                    return arg;
+
+                if (arg is INamedTypeSymbol s)
+                    return TypeInfo.FromSymbol(s);
+
+                return arg;
             }
         }
     }

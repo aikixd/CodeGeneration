@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aikixd.CodeGeneration.Test.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aikixd.CodeGeneration.Test.CSharp.Target.Standard", "Aikixd.CodeGeneration.Test.CSharp.Target.Standard\Aikixd.CodeGeneration.Test.CSharp.Target.Standard.csproj", "{79D6B7B2-60D0-48B7-8F13-4809DE1E4AB3}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aikixd.CodeGeneration.Test.CSharp.Target.Standard2", "Aikixd.CodeGeneration.Test.CSharp.Target.Standard2\Aikixd.CodeGeneration.Test.CSharp.Target.Standard2.csproj", "{62D65029-A99E-4C9F-825E-6EAC86736E6A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{79D6B7B2-60D0-48B7-8F13-4809DE1E4AB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79D6B7B2-60D0-48B7-8F13-4809DE1E4AB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79D6B7B2-60D0-48B7-8F13-4809DE1E4AB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62D65029-A99E-4C9F-825E-6EAC86736E6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62D65029-A99E-4C9F-825E-6EAC86736E6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62D65029-A99E-4C9F-825E-6EAC86736E6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62D65029-A99E-4C9F-825E-6EAC86736E6A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

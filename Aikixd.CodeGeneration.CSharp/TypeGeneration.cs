@@ -15,23 +15,41 @@ namespace Aikixd.CodeGeneration.CSharp
     public class TypeGeneration : ITypeGeneration
     {
         private readonly string fileNameModifier;
-        private readonly Func<INamedTypeSymbol, string> codeGenFn;
+        private readonly Func<Compilation, INamedTypeSymbol, string> codeGenFn;
 
         public TypeGeneration(string fileNameModifier, Func<INamedTypeSymbol, string> codeGenFn)
+            : this(fileNameModifier, (c, t) => codeGenFn(t))
+        { }
+        public TypeGeneration(string fileNameModifier, Func<Compilation, INamedTypeSymbol, string> codeGenFn)
         {
             this.fileNameModifier = fileNameModifier;
             this.codeGenFn = codeGenFn;
         }
 
-        public FileGenerationInfo CreateFileGenerationInfo(INamedTypeSymbol symbol)
+        public FileGenerationInfo CreateFileGenerationInfo(Compilation compilation, INamedTypeSymbol symbol)
         {
             return new FileGenerationInfo(
-                symbol.Name,
+                getName(),
                 symbol.ContainingNamespace.ToDisplayString(),
                 this.fileNameModifier,
                 "cs",
-                this.codeGenFn(symbol));
-        }
+                this.codeGenFn(compilation, symbol));
 
+            string getName()
+            {
+                var str = symbol.Name;
+
+                var s = symbol;
+
+                while (s.ContainingType != null)
+                {
+                    s = s.ContainingType;
+
+                    str = $"{s.Name}.{str}";
+                }
+
+                return str;
+            }
+        }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,16 +35,17 @@ namespace Aikixd.CodeGeneration.CSharp
             this.gens = gens;
         }
 
-        public IEnumerable<FileGenerationInfo> Execute(SemanticModel semanticModel)
+        public IEnumerable<FileGenerationInfo> Execute(Project prj, Compilation compilation)
         {
             return
                 this
                 .searchPatterns
-                .SelectMany(x => x.Apply(semanticModel))
+                .SelectMany(x => x.Apply(compilation))
+                .Where(x => x.ContainingAssembly.Identity.Name == prj.Name)
                 .Distinct()
                 .SelectMany(x => 
                     this.gens.Select(y =>
-                        y.CreateFileGenerationInfo(x)));
+                        y.CreateFileGenerationInfo(compilation, x)));
         }
     }
 }

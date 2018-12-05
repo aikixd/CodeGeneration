@@ -14,7 +14,7 @@ namespace Aikixd.CodeGeneration.CSharp
         /// </summary>
         /// <param name="semanticModel">The semantic model to look in.</param>
         /// <returns>The type symbol that matches the search.</returns>
-        IEnumerable<INamedTypeSymbol> Apply(SemanticModel semanticModel);
+        IEnumerable<INamedTypeSymbol> Apply(Compilation compilation);
     }
 
     /// <summary>
@@ -28,7 +28,7 @@ namespace Aikixd.CodeGeneration.CSharp
         /// </summary>
         /// <param name="semanticModel">The semantic model to search in.</param>
         /// <returns>A generation infos for the found feature.</returns>
-        IEnumerable<FileGenerationInfo> Execute(SemanticModel semanticModel);
+        IEnumerable<FileGenerationInfo> Execute(Project prj, Compilation compilation);
     }
 
     /// <summary>
@@ -41,6 +41,6 @@ namespace Aikixd.CodeGeneration.CSharp
         /// </summary>
         /// <param name="symbol">The symbol of the found feature.</param>
         /// <returns>A generation info based on the feature.</returns>
-        FileGenerationInfo CreateFileGenerationInfo(INamedTypeSymbol symbol);
+        FileGenerationInfo CreateFileGenerationInfo(Compilation compilation, INamedTypeSymbol symbol);
     }
 }
