@@ -50,6 +50,10 @@ namespace Aikixd.CodeGeneration.Test.CSharp
                         new TypeGeneration("testprops", TestProperties)),
 
                     new TypeQuery(
+                        new TypeAttributeSearchPattern<RecursiveAttribute>(),
+                        new TypeGeneration("rec", TestRecursive)),
+
+                    new TypeQuery(
                         new TypeAttributeSearchPattern<ArrayArgAttribute>(),
                         new TypeGeneration("arrayarg", TestArrayArg)),
 
@@ -108,6 +112,26 @@ namespace Aikixd.CodeGeneration.Test.CSharp
             return $"namespace {nfo.Namespace} {{" +
                 $"partial class {x.Name} {{ string test; }}" +
                 $"}}";
+        }
+
+        static string TestRecursive(INamedTypeSymbol x)
+        {
+            var nfo = ClassInfo.FromSymbol(x);
+
+            if (nfo.Name != "DecorationWithRecursive")
+                return getText(nfo);
+
+            Debug.Assert(nfo.Attributes.Single().Type.Name == nameof(RecursiveAttribute));
+            Debug.Assert(nfo.Fields.Single().Type.AsClass().Attributes.Single().Type.Name == nameof(RecursiveAttribute));
+
+            return getText(nfo);
+
+            string getText(ClassInfo i)
+            {
+                return $"namespace {i.Namespace} {{" +
+                    $"partial class {i.Name} {{ string test; }}" +
+                    $"}}";
+            }
         }
 
         static string TestSerialized(INamedTypeSymbol x)

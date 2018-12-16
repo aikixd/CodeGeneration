@@ -18,6 +18,7 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
         private interface IOrigin
         {
             InterfaceInfo AsInterfaceInfo();
+            ClassInfo AsClassInfo();
         }
 
         private class RoslynOrigin : IOrigin
@@ -33,6 +34,14 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
             {
                 if (this.symbol is INamedTypeSymbol nt)
                     return InterfaceInfo.FromSymbol(nt);
+
+                return null;
+            }
+
+            public ClassInfo AsClassInfo()
+            {
+                if (this.symbol is INamedTypeSymbol nt)
+                    return ClassInfo.FromSymbol(nt);
 
                 return null;
             }
@@ -160,6 +169,11 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
         public InterfaceInfo AsInterface()
         {
             return this.origin.AsInterfaceInfo();
+        }
+
+        public ClassInfo AsClass()
+        {
+            return this.origin.AsClassInfo();
         }
     }
 }

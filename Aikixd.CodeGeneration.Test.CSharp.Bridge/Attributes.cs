@@ -66,4 +66,11 @@ namespace Aikixd.CodeGeneration.Test.CSharp.Bridge
         public TestPropertiesAttribute()
         { }
     }
+
+    [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    public sealed class RecursiveAttribute : Attribute
+    {
+        public RecursiveAttribute()
+        { }
+    }
 }
