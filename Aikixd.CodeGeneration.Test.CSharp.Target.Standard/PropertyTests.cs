@@ -5,9 +5,12 @@ using System.Text;
 
 namespace Aikixd.CodeGeneration.Test.CSharp.Target.Standard
 {
-    [Detect]
-    partial class DetectClass
+    [TestProperties]
+    class PropertyTests
     {
-        
+        public string Str => "str";
+
+        public string Auto1 { get; }
+        public string Auto2 { get; set; }
     }
 }

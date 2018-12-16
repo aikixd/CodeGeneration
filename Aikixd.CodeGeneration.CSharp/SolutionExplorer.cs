@@ -14,6 +14,11 @@ namespace Aikixd.CodeGeneration.CSharp
 
         static CSharpSolutionExplorer()
         {
+            registerMsBuild();
+        }
+
+        private static void registerMsBuild()
+        {
             var instances = MSBuildLocator.QueryVisualStudioInstances().ToArray();
             if (instances.Length == 0)
             {

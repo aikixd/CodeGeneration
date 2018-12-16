@@ -59,4 +59,11 @@ namespace Aikixd.CodeGeneration.Test.CSharp.Bridge
         public TypeAttribute(Type type)
         { }
     }
+
+    [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    public sealed class TestPropertiesAttribute : Attribute
+    {
+        public TestPropertiesAttribute()
+        { }
+    }
 }

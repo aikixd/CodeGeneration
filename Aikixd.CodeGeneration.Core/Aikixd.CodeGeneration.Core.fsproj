@@ -16,7 +16,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Infrastructure.fs" />
     <Compile Include="Project.fs" />
+    <Compile Include="Command.fs" />
     <Compile Include="Generator.fs" />
   </ItemGroup>
 

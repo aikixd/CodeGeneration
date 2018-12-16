@@ -35,6 +35,8 @@ namespace Aikixd.CodeGeneration.CSharp
             this.gens = gens;
         }
 
+        public IEnumerable<FileGroup> Groups => this.gens.Select(x => x.Group);
+
         public IEnumerable<FileGenerationInfo> Execute(Project prj, Compilation compilation)
         {
             return

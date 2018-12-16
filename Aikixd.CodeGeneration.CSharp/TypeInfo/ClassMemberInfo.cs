@@ -25,9 +25,18 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
         }
     }
 
-    public sealed class FieldMemberInfo : MemberInfo
+    public abstract class DataMemberInfo : MemberInfo
     {
         public TypeInfo Type { get; }
+
+        protected DataMemberInfo(string name, TypeInfo type, IEnumerable<AttributeInfo> attrs) : base(name, attrs)
+        {
+            this.Type = type;
+        }
+    }
+
+    public sealed class FieldMemberInfo : DataMemberInfo
+    {
         public bool IsReadOnly { get; }
 
         public FieldMemberInfo(
@@ -35,9 +44,8 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
             TypeInfo type,
             bool isReadOnly,
             IEnumerable<AttributeInfo> attrs)
-            : base(name, attrs)
+            : base(name, type, attrs)
         {
-            this.Type = type;
             this.IsReadOnly = isReadOnly;
         }
 
@@ -51,9 +59,8 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
         }
     }
 
-    public sealed class PropertyMemberInfo : MemberInfo
+    public sealed class PropertyMemberInfo : DataMemberInfo
     {
-        public TypeInfo Type { get; }
         public bool IsAutoProperty { get; }
 
         public PropertyMemberInfo(
@@ -61,10 +68,14 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
             TypeInfo                   type,
             bool                       isAutoProperty,
             IEnumerable<AttributeInfo> attrs)
-            : base(name, attrs)
+            : base(name, type, attrs)
         {
-            this.Type = type;
             this.IsAutoProperty = isAutoProperty;
+        }
+
+        public static PropertyMemberInfo Generate(string name, TypeInfo type)
+        {
+            return new PropertyMemberInfo(name, type, true, Enumerable.Empty<AttributeInfo>());
         }
 
         internal static PropertyMemberInfo FromSymbol(IPropertySymbol s)
@@ -77,11 +88,12 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 
             var getter = syntax.AccessorList?.Accessors.FirstOrDefault(x => x.IsKind(SyntaxKind.GetAccessorDeclaration));
             var setter = syntax.AccessorList?.Accessors.FirstOrDefault(x => x.IsKind(SyntaxKind.SetAccessorDeclaration));
+            var expressionBody = syntax.ExpressionBody?.Kind() == SyntaxKind.ArrowExpressionClause ? syntax.ExpressionBody : null;
 
-            Debug.Assert(setter != null || getter != null, "Property must have a setter or getter.");
+            Debug.Assert(setter != null || getter != null || expressionBody != null, "Property must have a setter or getter.");
 
             bool setterAssertedAuto = setter != null ? setter.Body == null : true;
-            bool getterAssertedAuto = getter != null ? getter.Body == null : true;
+            bool getterAssertedAuto = getter != null ? getter.Body == null : expressionBody == null;
 
             isAutoProp = getterAssertedAuto && setterAssertedAuto;
             

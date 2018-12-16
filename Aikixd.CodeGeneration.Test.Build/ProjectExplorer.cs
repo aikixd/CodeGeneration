@@ -3,19 +3,20 @@ using Microsoft.Build.Evaluation;
 using System.IO;
 using System.Linq;
 
-namespace Aikixd.CodeGeneration.CSharp
+namespace Aikixd.CodeGeneration.Test.Build
 {
-    public sealed class CSharpProjectExplorer : IProjectExplorer
+
+    class ProjectExplorer : IProjectExplorer
     {
         private readonly Project project;
         private readonly bool defaultCompileItems;
 
-        public CSharpProjectExplorer(Project project)
+        public ProjectExplorer(Project project)
         {
             this.project = project;
             this.defaultCompileItems = bool.Parse(project.GetProperty("EnableDefaultCompileItems")?.EvaluatedValue ?? bool.FalseString);
         }
-        
+
         public string GetGenerationPath(string generationRelativePath)
         {
             return Path.Combine(this.project.DirectoryPath, generationRelativePath);
@@ -27,7 +28,7 @@ namespace Aikixd.CodeGeneration.CSharp
             {
                 var relPath = path.Replace(this.project.DirectoryPath.TrimEnd('\\') + "\\", "");
 
-                if (this.project.GetItems("Compile").Any(x => x.EvaluatedInclude == relPath) == false)
+                if (project.GetItems("Compile").Any(x => x.EvaluatedInclude == relPath) == false)
                     this.project.AddItem("Compile", relPath);
             }
 
@@ -53,7 +54,6 @@ namespace Aikixd.CodeGeneration.CSharp
                     this.project
                     .GetItems("Compile")
                     .Where(x => x.EvaluatedInclude == relPath));
-                    
             }
 
             File.Delete(path);
@@ -62,7 +62,8 @@ namespace Aikixd.CodeGeneration.CSharp
 
         public void Save()
         {
-            // No need to save the project file, it will be saved by solution explorer.
+
         }
     }
+
 }

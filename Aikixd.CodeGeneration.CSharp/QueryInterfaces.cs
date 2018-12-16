@@ -29,6 +29,11 @@ namespace Aikixd.CodeGeneration.CSharp
         /// <param name="semanticModel">The semantic model to search in.</param>
         /// <returns>A generation infos for the found feature.</returns>
         IEnumerable<FileGenerationInfo> Execute(Project prj, Compilation compilation);
+
+        /// <summary>
+        /// Gets all file groups that this query creates.
+        /// </summary>
+        IEnumerable<FileGroup> Groups { get; }
     }
 
     /// <summary>
@@ -42,5 +47,10 @@ namespace Aikixd.CodeGeneration.CSharp
         /// <param name="symbol">The symbol of the found feature.</param>
         /// <returns>A generation info based on the feature.</returns>
         FileGenerationInfo CreateFileGenerationInfo(Compilation compilation, INamedTypeSymbol symbol);
+
+        /// <summary>
+        /// Gets a file group that this generator will produce.
+        /// </summary>
+        FileGroup Group { get; }
     }
 }

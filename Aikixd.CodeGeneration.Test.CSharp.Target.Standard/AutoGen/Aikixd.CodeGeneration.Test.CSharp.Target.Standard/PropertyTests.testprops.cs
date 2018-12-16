@@ -1,0 +1,1 @@
+namespace Aikixd.CodeGeneration.Test.CSharp.Target.Standard {partial class PropertyTests { string test; }}

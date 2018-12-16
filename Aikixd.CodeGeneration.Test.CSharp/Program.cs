@@ -13,16 +13,13 @@ using System.Linq;
 
 namespace Aikixd.CodeGeneration.Test.CSharp
 {
-
-
-    internal sealed class DefinitionAnalyzer : IGenerationInfoSource
+    internal sealed class DefinitionAnalyzer
     {
         public IEnumerable<ProjectGenerationInfo> GenerateInfo()
         {
             return Enumerable.Empty<ProjectGenerationInfo>();
         }
     }
-
 
     [Serializable]
     class Program
@@ -47,7 +44,11 @@ namespace Aikixd.CodeGeneration.Test.CSharp
                     new TypeQuery(
                         new TypeAttributeSearchPattern<DetectAttribute>(),
                         new TypeGeneration("detect", TestSymbol)),
-                    
+
+                    new TypeQuery(
+                        new TypeAttributeSearchPattern<TestPropertiesAttribute>(),
+                        new TypeGeneration("testprops", TestProperties)),
+
                     new TypeQuery(
                         new TypeAttributeSearchPattern<ArrayArgAttribute>(),
                         new TypeGeneration("arrayarg", TestArrayArg)),
@@ -69,7 +70,7 @@ namespace Aikixd.CodeGeneration.Test.CSharp
             var g =
                 nfos
                 .SelectMany(x => x.FileGeneration)
-                .GroupBy(x => x.Name + "." + x.Modifier);
+                .GroupBy(x => x.Name + "." + x.Group.Modifier);
 
             if (g.Any(x => x.Count() > 1))
             {
@@ -85,7 +86,24 @@ namespace Aikixd.CodeGeneration.Test.CSharp
         {
             var nfo = ClassInfo.FromSymbol(x);
 
-            var members = string.Join(", ", ClassInfo.FromSymbol(x).Fields.Select(y => y.Name));
+            var members = string.Join(", ", nfo.Fields.Select(y => y.Name));
+
+            return $"namespace {nfo.Namespace} {{" +
+                $"partial class {x.Name} {{ string test; }}" +
+                $"}}";
+        }
+
+        static string TestProperties(INamedTypeSymbol x)
+        {
+            var nfo = ClassInfo.FromSymbol(x);
+
+            var expressionProp = nfo.Properties.Single(p => p.Name == "Str");
+            var auto1 = nfo.Properties.Single(p => p.Name == "Auto1");
+            var auto2 = nfo.Properties.Single(p => p.Name == "Auto2");
+
+            Debug.Assert(expressionProp.IsAutoProperty == false);
+            Debug.Assert(auto1.IsAutoProperty == true);
+            Debug.Assert(auto2.IsAutoProperty == true);
 
             return $"namespace {nfo.Namespace} {{" +
                 $"partial class {x.Name} {{ string test; }}" +

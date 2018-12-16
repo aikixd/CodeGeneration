@@ -18,7 +18,7 @@ namespace Aikixd.CodeGeneration.CSharp
     /// and generates the <see cref="FileGenerationInfo"/> based on the found
     /// occurences.
     /// </summary>
-    public sealed class FeatureInfoSource : IGenerationInfoSource
+    public sealed class FeatureInfoSource
     {
         private readonly MSBuildWorkspace workspace;
         private readonly Solution solution;
@@ -60,7 +60,7 @@ namespace Aikixd.CodeGeneration.CSharp
             set => this.projectFilter = value ?? throw new ArgumentNullException("Function");
         }
 
-        public IEnumerable<ProjectGenerationInfo> GenerateInfo()
+        public HashSet<ProjectGenerationInfo> GenerateInfo()
         {
             var occurs =
                 this.solution
@@ -74,22 +74,17 @@ namespace Aikixd.CodeGeneration.CSharp
                     .Select(x => new
                     {
                         x.prj,
+                        groups = this.queries.SelectMany(q => q.Groups).Distinct(),
                         nfos = this.queries.SelectMany(q =>
                             q.Execute(x.prj, x.cmp))
                     });
-                        
-                    //)
-                    //.Select(prj => new {
-                    //    prj,
-                    //    cmp = prj.GetCompilationAsync().Result.GlobalNamespace.gett,
-                    //    nfos = prj.Documents.SelectMany(processDoc) });
 
-            return 
+            return new HashSet<ProjectGenerationInfo>(
                 occurs
-                .Select(x => new ProjectGenerationInfo(x.prj.FilePath, x.nfos.ToArray()))
-                .ToArray();
+                .Select(x => new ProjectGenerationInfo(
+                    x.prj.FilePath, 
+                    x.groups, 
+                    new HashSet<FileGenerationInfo>(x.nfos))));
         }
-
-        
     }
 }

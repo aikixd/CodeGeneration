@@ -26,13 +26,14 @@ namespace Aikixd.CodeGeneration.CSharp
             this.codeGenFn = codeGenFn;
         }
 
+        public FileGroup Group => new FileGroup(this.fileNameModifier, "cs");
+
         public FileGenerationInfo CreateFileGenerationInfo(Compilation compilation, INamedTypeSymbol symbol)
         {
             return new FileGenerationInfo(
                 getName(),
                 symbol.ContainingNamespace.ToDisplayString(),
-                this.fileNameModifier,
-                "cs",
+                this.Group,
                 this.codeGenFn(compilation, symbol));
 
             string getName()
