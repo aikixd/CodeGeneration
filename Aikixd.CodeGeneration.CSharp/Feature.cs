@@ -18,7 +18,7 @@ namespace Aikixd.CodeGeneration.CSharp
     /// and generates the <see cref="FileGenerationInfo"/> based on the found
     /// occurences.
     /// </summary>
-    public sealed class FeatureInfoSource
+    public sealed class FeatureLookup
     {
         private readonly MSBuildWorkspace workspace;
         private readonly Solution solution;
@@ -27,7 +27,7 @@ namespace Aikixd.CodeGeneration.CSharp
 
         private readonly IEnumerable<IFeatureQuery> queries;
 
-        public FeatureInfoSource(string solutionPath, IEnumerable<IFeatureQuery> queries)
+        public FeatureLookup(string solutionPath, IEnumerable<IFeatureQuery> queries)
         {
             this.projectFilter = _ => true;
 

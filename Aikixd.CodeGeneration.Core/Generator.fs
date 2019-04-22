@@ -56,7 +56,7 @@ namespace Aikixd.CodeGeneration.Core
             match cmd with
             | Create fi -> project.CreateFile (mkPath fi) fi.Contents
             | Modify fi -> project.OverwriteFile (mkPath fi) fi.Contents
-            | Delete p  -> project.RemoveFile p.Value
+            | Delete p  -> project.RemoveFile (Path.Combine(project.GetGenerationPath generationRelativePath, p.Value))
 
         let processProject (projectNfo) =
 

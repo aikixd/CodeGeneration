@@ -23,11 +23,11 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
         }
 
         public TypeInfo                            Type            { get; }
-        public MethodInfo                          Constructor     { get; }
+        public MethodMemberInfo                    Constructor     { get; }
         public IList<object>                       PassedArguments { get; }
         public IReadOnlyDictionary<string, object> NamedArguments  { get; }
 
-        public AttributeInfo(TypeInfo type, MethodInfo constructor, IList<object> passedArguments, IReadOnlyDictionary<string, object> namedArguments)
+        public AttributeInfo(TypeInfo type, MethodMemberInfo constructor, IList<object> passedArguments, IReadOnlyDictionary<string, object> namedArguments)
         {
             this.Type            = type            ?? throw new ArgumentNullException(nameof(type));
             this.Constructor     = constructor     ?? throw new ArgumentNullException(nameof(constructor));
@@ -46,7 +46,7 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
         {
             return new AttributeInfo(
                 TypeInfo.FromSymbol(attributeData.AttributeClass),
-                MethodInfo.FromSymbol(attributeData.AttributeConstructor),
+                MethodMemberInfo.FromSymbol(attributeData.AttributeConstructor),
                 attributeData.ConstructorArguments.Select(getPassedArg).ToArray(),
                 attributeData.NamedArguments.ToDictionary(x => x.Key, x => x.Value.Value));
 

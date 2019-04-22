@@ -3,16 +3,16 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
     <PackageOutputPath>C:\Dev\LocalPackages\Aikixd.CodeGeneration\</PackageOutputPath>
-    <Version>0.3.0-prerelease</Version>
+    <Version>0.5.0-prerelease</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <Authors>Dmitriy Sorkin</Authors>
     <Company />
     <Product />
     <Description>Helps to manage code generation within the solution.</Description>
-    <PackageProjectUrl>https://github.com/aikixd/CodeGeneration</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/aikixd/CodeGeneration/blob/master/LICENSE</PackageLicenseUrl>
-    <RepositoryUrl>https://github.com/aikixd/CodeGeneration</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/aikixd/FunctionalExtensions</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/aikixd/FunctionalExtensions/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/aikixd/FunctionalExtensions</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

@@ -14,19 +14,19 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
         public string Namespace => this.TypeInfo.Namespace;
         public string FullName => this.TypeInfo.FullName;
 
-        public AccessabilityInfo Accessabilty { get; }
+        public Accessibility Accessabilty { get; }
 
         public IEnumerable<MemberInfo> Members { get; }
         public IEnumerable<PropertyMemberInfo> Properties { get; }
-        public IEnumerable<MethodInfo> Methods { get; }
+        public IEnumerable<MethodMemberInfo> Methods { get; }
 
         public IEnumerable<AttributeInfo> Attributes { get; }
 
         private InterfaceInfo(
             TypeInfo typeInfo,
-            AccessabilityInfo accessabilty,
+            Accessibility accessabilty,
             IEnumerable<PropertyMemberInfo> properties,
-            IEnumerable<MethodInfo> methods,
+            IEnumerable<MethodMemberInfo> methods,
             IEnumerable<AttributeInfo> attributes)
         {
             this.TypeInfo     = typeInfo;
@@ -44,7 +44,7 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
         public static InterfaceInfo FromSymbol(INamedTypeSymbol symbol)
         {
             var props = new LinkedList<PropertyMemberInfo>();
-            var methods = new LinkedList<MethodInfo>();
+            var methods = new LinkedList<MethodMemberInfo>();
 
             foreach (var s in symbol.GetMembers())
             {
@@ -56,42 +56,42 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 
                     case SymbolKind.Method:
                         if (s.CanBeReferencedByName)
-                            methods.AddLast(MethodInfo.FromSymbol((IMethodSymbol)s));
+                            methods.AddLast(MethodMemberInfo.FromSymbol((IMethodSymbol)s));
                         break;
                 }
             }
 
             return new InterfaceInfo(
                 TypeInfo.FromSymbol(symbol),
-                getAccessability(symbol.DeclaredAccessibility),
+                getAccessibility(symbol.DeclaredAccessibility),
                 props,
                 methods,
                 symbol.GetAttributes().Select(AttributeInfo.Create).ToArray());
 
-            AccessabilityInfo getAccessability(Accessibility access)
+            Accessibility getAccessibility(Microsoft.CodeAnalysis.Accessibility access)
             {
                 switch (access)
                 {
-                    case Accessibility.NotApplicable:
-                        return AccessabilityInfo.None;
+                    case Microsoft.CodeAnalysis.Accessibility.NotApplicable:
+                        return Accessibility.None;
 
-                    case Accessibility.Private:
-                        return AccessabilityInfo.Private;
+                    case Microsoft.CodeAnalysis.Accessibility.Private:
+                        return Accessibility.Private;
 
-                    case Accessibility.Protected:
-                        return AccessabilityInfo.Protected;
+                    case Microsoft.CodeAnalysis.Accessibility.Protected:
+                        return Accessibility.Protected;
 
-                    case Accessibility.Public:
-                        return AccessabilityInfo.Public;
+                    case Microsoft.CodeAnalysis.Accessibility.Public:
+                        return Accessibility.Public;
 
-                    case Accessibility.Internal:
-                        return AccessabilityInfo.Internal;
+                    case Microsoft.CodeAnalysis.Accessibility.Internal:
+                        return Accessibility.Internal;
 
-                    case Accessibility.ProtectedAndInternal:
-                        return AccessabilityInfo.Protected | AccessabilityInfo.Internal;
+                    case Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal:
+                        return Accessibility.Protected | Accessibility.Internal;
 
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(access), $"Interface accessability {access.ToString()} is not supported.");
+                        throw new ArgumentOutOfRangeException(nameof(access), $"Interface accessibility {access.ToString()} is not supported.");
                 }
             }
         }

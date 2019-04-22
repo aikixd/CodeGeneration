@@ -10,6 +10,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading;
 
 namespace Aikixd.CodeGeneration.Test.CSharp
 {
@@ -33,11 +36,11 @@ namespace Aikixd.CodeGeneration.Test.CSharp
         {
             var generator = new Generator("AutoGen", new CSharpSolutionExplorer());
 
-            var analyzers = new FeatureInfoSource(
+            var analyzers = new FeatureLookup(
                 @"C:\Dev\Aikixd.CodeGeneration\Aikixd.CodeGeneration.TestSolution.sln",
-                
+
                 new IFeatureQuery[] {
-                    new TypeQuery(
+                    /*new TypeQuery(
                         new TypeAttributeSearchPattern<SerializableAttribute>(),
                         new TypeGeneration("serialized", TestSerialized)),
 
@@ -59,18 +62,25 @@ namespace Aikixd.CodeGeneration.Test.CSharp
 
                     new TypeQuery(
                         new TypeAttributeSearchPattern<TypeAttribute>(),
-                        new TypeGeneration("type", TestType)),
+                        new TypeGeneration("type", TestType)),*/
 
+                    new TypeQuery(
+                        new TypeAttributeSearchPattern<TestAttribute>(),
+                        new TypeGeneration("test", RouteTest)),
+                    /*
                     new TypeQuery(
                         new TypeAttributeSearchPattern<CombinedAttribute>(),
                         new [] {
                             new TypeGeneration("combined.serializzed", TestSerialized),
                             new TypeGeneration("combined.arrayarg", TestArrayArg)
                         })
+                        */
                 });
 
             var nfos = analyzers.GenerateInfo();
+            RunFirstOrderTests();
 
+#if DEBUG
             var g =
                 nfos
                 .SelectMany(x => x.FileGeneration)
@@ -82,8 +92,121 @@ namespace Aikixd.CodeGeneration.Test.CSharp
                 var allGroups = g.Where(x => x.Count() > 1).ToArray();
                 Debug.Fail($"More than one generation exist for file {group.Key}.");
             }
+#endif
 
             generator.Generate(nfos);
+
+            // TODO: check trough reflection that all tests have run.
+            Console.Write(testResults.ToString());
+            Console.WriteLine(failedTests ? "Has failed tests." : "All tests passed.");
+
+            Console.ReadKey();
+        }
+
+
+        private const string AnalysisTestsNamespace = "Aikixd.CodeGeneration.Test.CSharp.AnalysisTests";
+        private const string FirstOrderTestsNamespace = "Aikixd.CodeGeneration.Test.CSharp.FirstOrderTests";
+        private static Dictionary<string, System.Reflection.MethodInfo> tests =
+            Assembly
+                .GetExecutingAssembly()
+                .GetTypes()
+                .Where(x => x.IsClass && x.Namespace == AnalysisTestsNamespace)
+                .SelectMany(x => x.GetMethods(BindingFlags.Static | BindingFlags.Public))
+                .ToDictionary(x => x.Name);
+
+        private static bool failedTests = false;
+        private static StringBuilder testResults = new StringBuilder();
+
+        static string RouteTest(INamedTypeSymbol symbol)
+        {
+            /*if (symbol.Name != "GenericClass")
+                return "";*/
+
+            var nfo = ClassInfo.FromSymbol(symbol);
+
+            return 
+                string.Join(
+                    "\r\n",
+                    nfo
+                    .Attributes
+                    .Where(x => x.Type.Name == "TestAttribute")
+                    .Select(
+                        x => x.PassedArguments.Count == 0 
+                        ? invokeTest(nfo.Name) 
+                        : invokeTest((string)x.PassedArguments[0])));
+
+            string invokeTest(string name)
+            {
+                var r = string.Empty;
+
+                if (tests.TryGetValue(name, out var test))
+                {
+                    try
+                    {
+                        test.Invoke(null, new[] { symbol });
+
+                        r = $"Test {name}: OK";
+                    }
+
+                    catch (TestAssertionException e)
+                    {
+                        failedTests = true;
+                        r = $"Test {name}: Failed: {e.Message}";
+                    }
+
+                    catch (Exception e)
+                    {
+                        failedTests = true;
+                        r = $"Test {name}: Unexpected exception: {e.Message}";
+                    }
+                }
+
+                else
+                {
+                    failedTests = true;
+                    Debug.Fail($"Test {name} not found.");
+                    r = $"Test {name} not found.";
+                }
+
+                testResults.AppendLine(r);
+                return r;
+            }
+        }
+
+        private static void RunFirstOrderTests()
+        {
+            var firstOrderTests =
+                Assembly
+                .GetExecutingAssembly()
+                .GetTypes()
+                .Where(x => x.IsClass && x.Namespace == FirstOrderTestsNamespace)
+                .SelectMany(x => x.GetMethods(BindingFlags.Static | BindingFlags.Public));
+
+            foreach (var t in firstOrderTests)
+            {
+                string r = string.Empty;
+
+                try
+                {
+                    t.Invoke(null, new object[0]);
+
+                    r = $"Test {t.Name}: OK";
+                }
+
+                catch (TestAssertionException e)
+                {
+                    failedTests = true;
+                    r = $"Test {t.Name}: Failed: {e.Message}";
+                }
+
+                catch (Exception e)
+                {
+                    failedTests = true;
+                    r = $"Test {t.Name}: Unexpected exception: {e.Message}";
+                }
+
+                testResults.AppendLine(r);
+            }
         }
 
         static string TestSymbol(INamedTypeSymbol x)

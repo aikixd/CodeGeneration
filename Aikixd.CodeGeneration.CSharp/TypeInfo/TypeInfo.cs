@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,91 +11,70 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
     public enum TypeKind
     {
         Object,
-        Array
+        Array,
+        TypeParameter
     }
 
-    public sealed class TypeInfo : IEquatable<TypeInfo>
+    public sealed partial class TypeInfo : IEquatable<TypeInfo>
     {
         private interface IOrigin
         {
+            TypeKind Kind { get; }
+            string Name { get; }
+            string Namespace { get; }
+            TypeInfo ContainingType { get; }
+            IEnumerable<TypeInfo> TypeParameters { get; }
+            Accessibility Accessibility { get; }
+            IEnumerable<AttributeInfo> Attributes { get; }
+
             InterfaceInfo AsInterfaceInfo();
             ClassInfo AsClassInfo();
         }
 
-        private class RoslynOrigin : IOrigin
-        {
-            private ITypeSymbol symbol;
-
-            public RoslynOrigin(ITypeSymbol symbol)
-            {
-                this.symbol = symbol;
-            }
-
-            public InterfaceInfo AsInterfaceInfo()
-            {
-                if (this.symbol is INamedTypeSymbol nt)
-                    return InterfaceInfo.FromSymbol(nt);
-
-                return null;
-            }
-
-            public ClassInfo AsClassInfo()
-            {
-                if (this.symbol is INamedTypeSymbol nt)
-                    return ClassInfo.FromSymbol(nt);
-
-                return null;
-            }
-        }
-
         private IOrigin origin;
 
-        public string Name { get; }
-        public string Namespace { get; }
-        public string FullName { get; }
-
-        public TypeInfo ContainingType { get; }
-        public IEnumerable<TypeInfo> TypeParameters { get; }
-        
-        public TypeKind Kind { get; }
-
-        private TypeInfo(
-            IOrigin origin,
-            string name,
-            string @namespace,
-            TypeInfo containingType,
-            IEnumerable<TypeInfo> typeParameters,
-            TypeKind kind)
+        private TypeInfo(IOrigin origin)
         {
             this.origin = origin;
-            this.Name = name;
-            this.Namespace = @namespace;
-            this.ContainingType = containingType;
-            this.TypeParameters = typeParameters;
-            this.Kind = kind;
+        }
 
-            this.FullName = getFullName();
+        public TypeInfo ContainingType => this.origin.ContainingType;
 
-            string getFullName()
+        public IEnumerable<TypeInfo>      TypeParameters => this.origin.TypeParameters;
+        public IEnumerable<AttributeInfo> Attributes     => this.origin.Attributes;
+
+
+        public TypeKind      Kind          => this.origin.Kind;
+        public Accessibility Accessibility => this.origin.Accessibility;
+        public string        Name          => this.origin.Name;
+        public string        Namespace     => this.origin.Namespace;
+
+
+        public string FullName
+        {
+            get
             {
-                var r = name;
-                var curContainer = containingType;
-
-                while (curContainer != null)
                 {
-                    r = $"{curContainer.Name}.{r}";
-                    curContainer = curContainer.ContainingType;
-                }
+                    var r = this.Name;
+                    var curContainer = this.ContainingType;
 
-                if (this.TypeParameters.Any())
-                {
-                    r = $"{r}<{ string.Join(", ", this.TypeParameters.Select(x => x.FullName)) }>";
-                }
+                    while (curContainer != null)
+                    {
+                        r = $"{curContainer.Name}.{r}";
+                        curContainer = curContainer.ContainingType;
+                    }
 
-                return $"{@namespace}.{r}";
+                    if (this.TypeParameters.Any())
+                    {
+                        r = $"{r}<{ string.Join(", ", this.TypeParameters.Select(x => x.FullName)) }>";
+                    }
+
+                    return $"{this.Namespace}.{r}";
+                }
             }
         }
 
+        #region Equality
         public bool Equals(TypeInfo other)
         {
             return
@@ -123,57 +103,142 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 
             return i;
         }
+        #endregion
 
+        public static TypeInfo Generate(string name, string @namespace, TypeKind kind, Accessibility accessibility)
+        {
+            return new TypeInfo(
+                new NullOrigin(
+                    name,
+                    @namespace,
+                    kind,
+                    accessibility));
+        }
+        
         public static TypeInfo FromSymbol(ITypeSymbol symbol)
         {
-            if (symbol.Kind == SymbolKind.ArrayType)
-            {
-                var arrSymbol = (IArrayTypeSymbol)symbol;
-                var elemType = arrSymbol.ElementType;
-
-                return new TypeInfo(
-                    new RoslynOrigin(elemType),
-                    elemType.Name,
-                    elemType.ContainingNamespace.ToDisplayString(),
-                    getContainingType(elemType),
-                    getTypeParameters(elemType),
-                    TypeKind.Array);
-            }
-
-            return new TypeInfo(
-                new RoslynOrigin(symbol),
-                symbol.Name,
-                symbol.ContainingNamespace.ToDisplayString(),
-                getContainingType(symbol),
-                getTypeParameters(symbol),
-                TypeKind.Object);
-
-            TypeInfo getContainingType(ITypeSymbol t)
-            {
-                return 
-                    t.ContainingType != null ?
-                    TypeInfo.FromSymbol(t.ContainingType) :
-                    null;
-            }
-
-            IEnumerable<TypeInfo> getTypeParameters(ITypeSymbol t)
-            {
-                if (t is INamedTypeSymbol nt)
-                    if (nt.IsGenericType)
-                        return nt.TypeArguments.Select(FromSymbol).ToArray();
-
-                return Enumerable.Empty<TypeInfo>();
-            }
+            return new TypeInfo(new RoslynOrigin(symbol));
         }
 
+        /// <summary>
+        /// Get this type info as interface info. Will not work for generated types.
+        /// </summary>
         public InterfaceInfo AsInterface()
         {
             return this.origin.AsInterfaceInfo();
         }
 
+        /// <summary>
+        /// Get this type info as class info. Will not work for generated types.
+        /// </summary>
+        /// <returns></returns>
         public ClassInfo AsClass()
         {
             return this.origin.AsClassInfo();
+        }
+
+        private partial class RoslynOrigin : IOrigin
+        {
+            private ISymbolContainer symbolContainer;
+
+            public RoslynOrigin(ITypeSymbol symbol)
+            {
+                this.Kind =
+                    symbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Array         ? TypeKind.Array :
+                    symbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.TypeParameter ? TypeKind.TypeParameter :
+                    TypeKind.Object;
+
+                if (this.Kind == TypeKind.Array)
+                    this.symbolContainer = new ArraySymbolContainer((IArrayTypeSymbol)symbol);
+
+                else
+                    this.symbolContainer = new RegularSymbolContainer(symbol);
+            }
+
+            public TypeKind Kind { get; }
+
+            public string Name      => this.symbolContainer.Name;
+            public string Namespace => this.symbolContainer.Namespace;
+
+            public Accessibility              Accessibility  => this.symbolContainer.Accessibility;
+            public TypeInfo                   ContainingType => this.symbolContainer.ContainingType;
+            public IEnumerable<TypeInfo>      TypeParameters => this.symbolContainer.TypeParameters;
+            public IEnumerable<AttributeInfo> Attributes     => this.symbolContainer.Attributes;
+
+            public InterfaceInfo AsInterfaceInfo()
+            {
+                return this.symbolContainer.AsInterface();
+            }
+
+            public ClassInfo AsClassInfo()
+            {
+                return this.symbolContainer.AsClass();
+            }
+
+            private static IEnumerable<TypeInfo> getTypeParameters(ITypeSymbol t)
+            {
+                if (t is INamedTypeSymbol nt)
+                    if (nt.IsGenericType)
+                        return
+                            nt.TypeArguments
+                            .Select(TypeInfo.FromSymbol)
+                            .ToArray();
+
+                return Enumerable.Empty<TypeInfo>();
+            }
+
+            private static Accessibility getAccessibility(Microsoft.CodeAnalysis.Accessibility access)
+            {
+                switch (access)
+                {
+                    case Microsoft.CodeAnalysis.Accessibility.NotApplicable:
+                        return Accessibility.None;
+
+                    case Microsoft.CodeAnalysis.Accessibility.Private:
+                        return Accessibility.Private;
+
+                    case Microsoft.CodeAnalysis.Accessibility.Protected:
+                        return Accessibility.Protected;
+
+                    case Microsoft.CodeAnalysis.Accessibility.Public:
+                        return Accessibility.Public;
+
+                    case Microsoft.CodeAnalysis.Accessibility.Internal:
+                        return Accessibility.Internal;
+
+                    case Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal:
+                        return Accessibility.Protected | Accessibility.Internal;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(access), $"Class accessibility {access.ToString()} is not supported.");
+                }
+            }
+        }
+
+        private class NullOrigin : IOrigin
+        {
+            public string Name { get; }
+            public string Namespace { get; }
+            public TypeKind Kind { get; }
+            public Accessibility Accessibility { get; }
+
+            public NullOrigin(string name, string @namespace, TypeKind kind, Accessibility accessibility)
+            {
+                this.Name          = name;
+                this.Namespace     = @namespace;
+                this.Kind          = kind;
+                this.Accessibility = accessibility;
+            }
+
+            public TypeInfo ContainingType => null;
+
+            public IEnumerable<TypeInfo> TypeParameters => Enumerable.Empty<TypeInfo>();
+
+            public IEnumerable<AttributeInfo> Attributes => Enumerable.Empty<AttributeInfo>();
+
+            public ClassInfo AsClassInfo() => null;
+
+            public InterfaceInfo AsInterfaceInfo() => null;
         }
     }
 }

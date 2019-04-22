@@ -3,7 +3,7 @@
 namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 {
     [Flags]
-    public enum AccessabilityInfo
+    public enum Accessibility
     {
         None      = 0,
         Inherited = 1 << 0,
