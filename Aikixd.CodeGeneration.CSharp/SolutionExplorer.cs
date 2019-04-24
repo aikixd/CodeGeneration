@@ -37,7 +37,7 @@ namespace Aikixd.CodeGeneration.CSharp
 
             Console.WriteLine(string.Empty);
 
-            var instance = instances[0];
+            var instance = instances.First(x => x.Version.Major == 15);
 
 
             MSBuildLocator.RegisterInstance(instance);
