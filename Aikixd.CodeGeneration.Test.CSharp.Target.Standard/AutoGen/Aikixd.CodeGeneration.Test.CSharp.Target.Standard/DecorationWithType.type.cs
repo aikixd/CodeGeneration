@@ -1,1 +1,0 @@
-// Attribute array argument test. Class name: DecorationWithType. TypeArg: System.IEquatable<Aikixd.CodeGeneration.Test.CSharp.Target.Standard.DecorationWithType>

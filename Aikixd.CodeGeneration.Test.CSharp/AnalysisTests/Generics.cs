@@ -29,11 +29,15 @@ namespace Aikixd.CodeGeneration.Test.CSharp.AnalysisTests
 
             Test.Assert(
                 fld.Type.Name == "T",
-                "Wrong generic type argument name.");
+                $"Wrong generic type argument name.\r\n" +
+                $"Expected: T\r\n" +
+                $"Got: {fld.Type.Name}");
 
             Test.Assert(
-                fld.Type.FullName == "Aikixd.CodeGeneration.Test.CSharp.Target.Standard.OpenGenericField+T",
-                "Wrong generic type argument name.");
+                fld.Type.FullName == "Aikixd.CodeGeneration.Test.CSharp.Target.Standard.OpenGenericField.T",
+                $"Wrong generic type argument name. \r\n" +
+                $"Expected: Aikixd.CodeGeneration.Test.CSharp.Target.Standard.OpenGenericField.T\r\n" +
+                $"Got: {fld.Type.FullName}");
         }
 
         public static void GenericInterfaceImplementation(INamedTypeSymbol symbol)

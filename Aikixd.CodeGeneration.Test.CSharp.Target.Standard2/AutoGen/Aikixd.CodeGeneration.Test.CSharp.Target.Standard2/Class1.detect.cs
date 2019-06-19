@@ -1,1 +1,0 @@
-namespace Aikixd.CodeGeneration.Test.CSharp.Target.Standard2 {partial class Class1 { string test; }}

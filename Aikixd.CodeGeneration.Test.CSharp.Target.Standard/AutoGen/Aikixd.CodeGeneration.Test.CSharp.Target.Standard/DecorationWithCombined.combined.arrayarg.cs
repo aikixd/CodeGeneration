@@ -1,1 +1,0 @@
-// Attribute array argument test. Class name: DecorationWithCombined.

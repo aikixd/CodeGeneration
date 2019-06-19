@@ -9,13 +9,29 @@ using System.Linq;
 namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 {
 
+    partial class MemberInfo
+    {
+        public interface IOrigin
+        {
+            bool   IsStatic { get; }
+            string Name     { get; }
+            IEnumerable<AttributeInfo> Attributes { get; }
+        }
+    }
+
+    partial class DataMemberInfo
+    {
+        new public interface IOrigin : MemberInfo.IOrigin
+        {
+            TypeInfo Type { get; }
+        }
+    }
+
     public sealed partial class FieldMemberInfo
     {
-        private interface IOrigin
+        new public interface IOrigin : DataMemberInfo.IOrigin
         {
-            bool                       IsReadOnly { get; }
-            string                     Name       { get; }
-            IEnumerable<AttributeInfo> Attributes { get; }
+            bool IsReadOnly { get; }
         }
 
         private class RoslynOrigin : IOrigin
@@ -27,8 +43,10 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
                 this.symbol = symbol ?? throw new ArgumentNullException(nameof(symbol));
             }
 
-            public bool   IsReadOnly => this.symbol.IsReadOnly;
-            public string Name       => this.symbol.Name;
+            public bool     IsReadOnly => this.symbol.IsReadOnly;
+            public bool     IsStatic   => this.symbol.IsStatic;
+            public string   Name       => this.symbol.Name;
+            public TypeInfo Type       => TypeInfo.FromSymbol(this.symbol.Type);
 
             public IEnumerable<AttributeInfo> Attributes =>
                 this.symbol.GetAttributes().Select(AttributeInfo.Create);
@@ -37,26 +55,44 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 
     partial class PropertyMemberInfo
     {
-        private interface IOrigin
+        new public interface IOrigin : DataMemberInfo.IOrigin
         {
             bool IsAutoProperty { get; }
-            string Name { get; }
-            IEnumerable<AttributeInfo> Attributes { get; }
         }
 
         private class NullOrigin : IOrigin
         {
-            public bool IsAutoProperty { get; }
+            public string   Name { get; }
+            public TypeInfo Type { get; }
 
-            public string Name { get; }
+            public bool IsAutoProperty { get; set; } = true;
+            public bool IsStatic       { get; set; } = false;
 
-            public IEnumerable<AttributeInfo> Attributes { get; }
+            private IEnumerable<AttributeInfo> attributes = Enumerable.Empty<AttributeInfo>();
+            public  IEnumerable<AttributeInfo> Attributes
+            {
+                get => this.attributes;
+                set
+                {
+                    this.attributes = value ?? throw new ArgumentNullException();
+                }
+            }
 
-            public NullOrigin(bool isAutoProperty, string name, IEnumerable<AttributeInfo> attributes)
+            [Obsolete()]
+            public NullOrigin(
+                bool isAutoProperty, string name, IEnumerable<AttributeInfo> attributes)
             {
                 this.IsAutoProperty = isAutoProperty;
+                this.Name           = name;
+                this.Attributes     = attributes;
+            }
+
+            public NullOrigin(
+                string name,
+                TypeInfo Type)
+            {
                 this.Name = name;
-                this.Attributes = attributes;
+                this.Type = Type;
             }
         }
 
@@ -66,24 +102,34 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 
             public RoslynOrigin(IPropertySymbol symbol)
             {
-                this.symbol = symbol;
-
                 Debug.Assert(symbol.DeclaringSyntaxReferences.Length == 1);
 
-                bool isAutoProp;
+                this.symbol         = symbol;
+                this.IsAutoProperty = isAutoProp();
 
-                var syntax = (PropertyDeclarationSyntax)symbol.DeclaringSyntaxReferences[0].GetSyntax();
+                bool isAutoProp()
+                {
+                    var syntax = (PropertyDeclarationSyntax)symbol.DeclaringSyntaxReferences[0].GetSyntax();
 
-                var getter = syntax.AccessorList?.Accessors.FirstOrDefault(x => x.IsKind(SyntaxKind.GetAccessorDeclaration));
-                var setter = syntax.AccessorList?.Accessors.FirstOrDefault(x => x.IsKind(SyntaxKind.SetAccessorDeclaration));
-                var expressionBody = syntax.ExpressionBody?.Kind() == SyntaxKind.ArrowExpressionClause ? syntax.ExpressionBody : null;
+                    var getter = syntax.AccessorList?.Accessors.FirstOrDefault(x => x.IsKind(SyntaxKind.GetAccessorDeclaration));
+                    var setter = syntax.AccessorList?.Accessors.FirstOrDefault(x => x.IsKind(SyntaxKind.SetAccessorDeclaration));
+                    var expressionBody = syntax.ExpressionBody?.Kind() == SyntaxKind.ArrowExpressionClause ? syntax.ExpressionBody : null;
 
-                Debug.Assert(setter != null || getter != null || expressionBody != null, "Property must have a setter or getter.");
+                    Debug.Assert(setter != null || getter != null || expressionBody != null, "Property must have a setter or getter.");
 
-                bool setterAssertedAuto = setter != null ? setter.Body == null : true;
-                bool getterAssertedAuto = getter != null ? getter.Body == null : expressionBody == null;
+                    bool setterAssertedAuto = isAccessorEmpty(setter);
+                    bool getterAssertedAuto = isAccessorEmpty(getter) && expressionBody == null;
 
-                this.IsAutoProperty = getterAssertedAuto && setterAssertedAuto;
+                    return getterAssertedAuto && setterAssertedAuto;
+                }
+
+                bool isAccessorEmpty(AccessorDeclarationSyntax accessor)
+                {
+                    if (accessor == null)
+                        return true;
+
+                    return accessor.Body == null && accessor.ExpressionBody == null;
+                }
             }
 
             public bool IsAutoProperty { get; }
@@ -91,16 +137,18 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
             public string Name => this.symbol.Name;
 
             public IEnumerable<AttributeInfo> Attributes => this.symbol.GetAttributes().Select(AttributeInfo.Create);
+
+            public TypeInfo Type => TypeInfo.FromSymbol(this.symbol.Type);
+
+            public bool IsStatic => this.symbol.IsStatic;
         }
     }
 
     partial class MethodMemberInfo
     {
-        private interface IOrigin
+        new private interface IOrigin : MemberInfo.IOrigin
         {
             IEnumerable<ParameterInfo> Parameters { get; }
-            string                     Name       { get; }
-            IEnumerable<AttributeInfo> Attributes { get; }
         }
 
         private class RoslynOrigin : IOrigin
@@ -119,6 +167,8 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 
             public IEnumerable<AttributeInfo> Attributes => 
                 this.symbol.GetAttributes().Select(AttributeInfo.Create);
+
+            public bool IsStatic => this.symbol.IsStatic;
         }
     }
 }

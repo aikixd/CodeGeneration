@@ -4,7 +4,7 @@
     <TargetFramework>net461</TargetFramework>
     <CodeAnalysisRuleSet>..\Solution.ruleset</CodeAnalysisRuleSet>
     <PackageOutputPath>C:\Dev\LocalPackages\Aikixd.CodeGeneration\</PackageOutputPath>
-    <Version>0.5.2-prerelease</Version>
+    <Version>0.5.3-prerelease</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <Authors>Dmitriy Sorkin</Authors>
