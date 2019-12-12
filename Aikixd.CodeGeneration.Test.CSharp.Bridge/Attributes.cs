@@ -74,7 +74,7 @@ namespace Aikixd.CodeGeneration.Test.CSharp.Bridge
         { }
     }
 
-    [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    [System.AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
     public sealed class TestAttribute : Attribute
     {
         public TestAttribute()

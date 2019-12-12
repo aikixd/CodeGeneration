@@ -11,11 +11,11 @@ namespace Aikixd.CodeGeneration.Test.CSharp.FirstOrderTests
     {
         public static void TypeInfoGeneration()
         {
-            var typ = TypeInfo.Generate("Name", "Namespace", TypeKind.Object, Accessibility.Private);
+            var typ = TypeInfo.Generate("Name", "Namespace", TypeKind.Class, Accessibility.Private);
 
             Test.Assert(typ.Name == "Name");
             Test.Assert(typ.FullName == "Namespace.Name");
-            Test.Assert(typ.Kind == TypeKind.Object);
+            Test.Assert(typ.Kind == TypeKind.Class);
             Test.Assert(typ.Accessibility == Accessibility.Private);
 
             Test.Assert(typ.ContainingType == null);

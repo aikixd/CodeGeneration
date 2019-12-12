@@ -1,86 +1,36 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{ECA5558E-3995-4A7E-97B5-2E1B15D1C441}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Aikixd.CodeGeneration.Test.CSharp</RootNamespace>
-    <AssemblyName>Aikixd.CodeGeneration.Test.CSharp</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <!--<PackageReference Include="Aikixd.CodeGeneration.Core" Version="0.5.0-prerelease" />
+    <PackageReference Include="Aikixd.CodeGeneration.CSharp" Version="0.5.3-prerelease" />
+    <PackageReference Include="Microsoft.Build" Version="15.7.179" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.7.179"  ExcludeAssets="runtime"  />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.7.179"  ExcludeAssets="runtime"  />
+    <PackageReference Include="Microsoft.Build.Locator" Version="1.2.6" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="2.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="2.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="2.9.0" />-->
+
+
+    <!--<PackageReference Include="Microsoft.Build.Locator" Version="1.2.6" />-->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.4.0" />
+    <!--<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="3.4.0" />-->
+
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="AnalysisTests\Members.cs" />
-    <Compile Include="FirstOrderTests\InfoGeneration.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="AnalysisTests\Decorations.cs" />
-    <Compile Include="AnalysisTests\Generics.cs" />
-    <Compile Include="AnalysisTests\TypeNesting.cs" />
-    <Compile Include="Test.cs" />
+    <ProjectReference Include="..\Aikixd.CodeGeneration.Core\Aikixd.CodeGeneration.Core.fsproj" />
+    <ProjectReference Include="..\Aikixd.CodeGeneration.CSharp\Aikixd.CodeGeneration.CSharp.csproj" />
+    <ProjectReference Include="..\Aikixd.CodeGeneration.Test.CSharp.Bridge\Aikixd.CodeGeneration.Test.CSharp.Bridge.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="App.config" />
+    <Folder Include="Properties\" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Locator">
-      <Version>1.0.18</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces">
-      <Version>2.9.0-beta4-62809-06</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild">
-      <Version>2.9.0-beta4-62809-06</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Aikixd.CodeGeneration.Core\Aikixd.CodeGeneration.Core.fsproj">
-      <Project>{6487a8b4-0db9-46eb-9d47-945671726c22}</Project>
-      <Name>Aikixd.CodeGeneration.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Aikixd.CodeGeneration.CSharp\Aikixd.CodeGeneration.CSharp.csproj">
-      <Project>{881fc781-5781-4f91-b42f-6e3c2011d190}</Project>
-      <Name>Aikixd.CodeGeneration.CSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Aikixd.CodeGeneration.Test.CSharp.Bridge\Aikixd.CodeGeneration.Test.CSharp.Bridge.csproj">
-      <Project>{215f4899-40bf-47d1-8bcf-5fe2939a1165}</Project>
-      <Name>Aikixd.CodeGeneration.Test.CSharp.Bridge</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>

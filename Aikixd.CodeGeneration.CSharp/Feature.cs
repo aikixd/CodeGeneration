@@ -71,6 +71,11 @@ namespace Aikixd.CodeGeneration.CSharp
                         prj,
                         cmp = prj.GetCompilationAsync().Result
                     })
+                    .Select(x =>
+                    {
+                        var d = x.cmp.GetDiagnostics();
+                        return x;
+                    })
                     .Select(x => new
                     {
                         x.prj,

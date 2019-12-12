@@ -2,68 +2,66 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 {
-    public sealed partial class ClassInfo
+    public partial class StructInfo
     {
         private IOrigin origin;
 
         public TypeInfo TypeInfo { get; }
         public DataTypeInfo DataTypeInfo { get; }
 
-        public string Name      => this.TypeInfo.Name;
+        public string Name => this.TypeInfo.Name;
         public string Namespace => this.TypeInfo.Namespace;
-        public string FullName  => this.TypeInfo.FullName;
+        public string FullName => this.TypeInfo.FullName;
 
 
         public Accessibility Accessabilty => this.TypeInfo.Accessibility;
-        public bool          IsStatic     => this.origin.IsStatic;
-        public bool          IsSealed     => this.origin.IsSealed;
+        public bool IsSealed => this.origin.IsSealed;
 
-        public IEnumerable<AttributeInfo>      Attributes => this.TypeInfo.Attributes;
-        public IEnumerable<FieldMemberInfo>    Fields     => this.DataTypeInfo.Fields;
-        public IEnumerable<MethodMemberInfo>   Methods    => this.origin.Methods;
+        public IEnumerable<AttributeInfo> Attributes => this.TypeInfo.Attributes;
+        public IEnumerable<FieldMemberInfo> Fields => this.DataTypeInfo.Fields;
+        public IEnumerable<MethodMemberInfo> Methods => this.origin.Methods;
         public IEnumerable<PropertyMemberInfo> Properties => this.DataTypeInfo.Properties;
 
-        public IEnumerable<MemberInfo> Members => 
+        public IEnumerable<MemberInfo> Members =>
             this.Properties
                 .Cast<MemberInfo>()
                 .Union(this.Methods)
                 .Union(this.Fields);
 
-
-        private ClassInfo(
-            DataTypeInfo typeDataInfo,
+        private StructInfo(
+            DataTypeInfo dataTypeInfo,
             IOrigin origin)
         {
-            var typeInfo = typeDataInfo.TypeInfo;
+            var typeInfo = dataTypeInfo.TypeInfo;
             
-            if (typeInfo.Kind != TypeKind.Class)
+            if (typeInfo.Kind != TypeKind.Struct)
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(typeInfo),
                     typeInfo,
-                    "Provided type info is not a class.");
+                    "Provided type info is not a struct.");
             }
 
             this.TypeInfo = typeInfo;
-            this.DataTypeInfo = typeDataInfo;
+            this.DataTypeInfo = dataTypeInfo;
             this.origin = origin;
         }
 
-        public static ClassInfo FromSymbol(INamedTypeSymbol symbol)
+        public static StructInfo FromSymbol(INamedTypeSymbol symbol)
         {
             if (symbol.DeclaringSyntaxReferences.Length == 0)
                 // Declared in referenced assemblies.
                 return null;
 
-            if (symbol.TypeKind != Microsoft.CodeAnalysis.TypeKind.Class)
+            if (symbol.TypeKind != Microsoft.CodeAnalysis.TypeKind.Struct)
                 return null;
 
-            return new ClassInfo(
-                DataTypeInfo.FromSymbol(symbol),
-                new RoslynOrigin(symbol));
+            return new StructInfo(DataTypeInfo.FromSymbol(symbol), new RoslynOrigin(symbol));
         }
     }
 }

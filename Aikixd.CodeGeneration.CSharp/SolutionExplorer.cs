@@ -14,7 +14,8 @@ namespace Aikixd.CodeGeneration.CSharp
 
         static CSharpSolutionExplorer()
         {
-            registerMsBuild();
+            //registerMsBuild();
+            MSBuildLocator.RegisterDefaults();
         }
 
         private static void registerMsBuild()
@@ -37,7 +38,7 @@ namespace Aikixd.CodeGeneration.CSharp
 
             Console.WriteLine(string.Empty);
 
-            var instance = instances.First(x => x.Version.Major == 15);
+            var instance = instances.FirstOrDefault(x => x.Version.Major == 16) ?? instances.First();
 
 
             MSBuildLocator.RegisterInstance(instance);

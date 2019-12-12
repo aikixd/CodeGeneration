@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Aikixd.CodeGeneration.Test.CSharp.AnalysisTests
 {
-    public class Members
+    public static class Members
     {
         private class FieldAssertions
         {
@@ -24,9 +24,12 @@ namespace Aikixd.CodeGeneration.Test.CSharp.AnalysisTests
             public string TypeFullName { get; internal set; }
         }
 
-        public static void ClassMembers(INamedTypeSymbol symbol)
+        public static void ClassMembers(INamedTypeSymbol symbol) => dataTypeMembers(symbol);
+        public static void StructMembers(INamedTypeSymbol symbol) => dataTypeMembers(symbol);
+
+        private static void dataTypeMembers(INamedTypeSymbol symbol)
         {
-            var nfo = ClassInfo.FromSymbol(symbol);
+            var nfo = DataTypeInfo.FromSymbol(symbol);
 
             var fieldAssertions = new Dictionary<string, FieldAssertions>
             {
@@ -113,6 +116,10 @@ namespace Aikixd.CodeGeneration.Test.CSharp.AnalysisTests
                   IsStatic = true,
                   TypeFullName = "System.Int32" } },
             };
+
+            // Structs can't have assigned proerties
+            if (symbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Struct)
+                propertiesAssertions.Remove("PropInt_auto_get_assigned");
 
             foreach (var fld in nfo.Fields)
                 asserFieldInfo(fld, fieldAssertions[fld.Name]);

@@ -10,9 +10,12 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 {
     public enum TypeKind
     {
-        Object,
+        Class,
+        Struct,
+        Interface,
         Array,
-        TypeParameter
+        TypeParameter,
+        Unknown
     }
 
     public sealed partial class TypeInfo : IEquatable<TypeInfo>
@@ -29,6 +32,7 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 
             InterfaceInfo AsInterfaceInfo();
             ClassInfo AsClassInfo();
+            StructInfo AsStructInfo();
         }
 
         private IOrigin origin;
@@ -137,6 +141,14 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
             return this.origin.AsClassInfo();
         }
 
+        /// <summary>
+        /// Get this type info as struct info. Will not work for generated types.
+        /// </summary>
+        public StructInfo AsStruct()
+        {
+            return this.origin.AsStructInfo();
+        }
+
         private partial class RoslynOrigin : IOrigin
         {
             private ISymbolContainer symbolContainer;
@@ -146,7 +158,10 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
                 this.Kind =
                     symbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Array         ? TypeKind.Array :
                     symbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.TypeParameter ? TypeKind.TypeParameter :
-                    TypeKind.Object;
+                    symbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Class         ? TypeKind.Class :
+                    symbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Struct        ? TypeKind.Struct :
+                    symbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Interface     ? TypeKind.Interface :
+                    TypeKind.Unknown;
 
                 if (this.Kind == TypeKind.Array)
                     this.symbolContainer = new ArraySymbolContainer((IArrayTypeSymbol)symbol);
@@ -165,6 +180,7 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
             public IEnumerable<TypeInfo>      TypeParameters => this.symbolContainer.TypeParameters;
             public IEnumerable<AttributeInfo> Attributes     => this.symbolContainer.Attributes;
 
+
             public InterfaceInfo AsInterfaceInfo()
             {
                 return this.symbolContainer.AsInterface();
@@ -173,6 +189,11 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
             public ClassInfo AsClassInfo()
             {
                 return this.symbolContainer.AsClass();
+            }
+
+            public StructInfo AsStructInfo()
+            {
+                return this.symbolContainer.AsStruct();
             }
 
             private static IEnumerable<TypeInfo> getTypeParameters(ITypeSymbol t)
@@ -210,7 +231,7 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
                         return Accessibility.Protected | Accessibility.Internal;
 
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(access), $"Class accessibility {access.ToString()} is not supported.");
+                        throw new ArgumentOutOfRangeException(nameof(access), $"Type accessibility {access.ToString()} is not supported.");
                 }
             }
         }
@@ -239,6 +260,8 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
             public ClassInfo AsClassInfo() => null;
 
             public InterfaceInfo AsInterfaceInfo() => null;
+
+            public StructInfo AsStructInfo() => null;
         }
     }
 }

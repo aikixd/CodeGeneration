@@ -21,6 +21,7 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 
                 ClassInfo AsClass();
                 InterfaceInfo AsInterface();
+                StructInfo AsStruct();
             }
 
             private class RegularSymbolContainer : ISymbolContainer
@@ -59,6 +60,14 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
                 {
                     if (this.symbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Interface)
                         return InterfaceInfo.FromSymbol((INamedTypeSymbol)symbol);
+
+                    return null;
+                }
+
+                public StructInfo AsStruct()
+                {
+                    if (this.symbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Struct)
+                        return StructInfo.FromSymbol((INamedTypeSymbol)symbol);
 
                     return null;
                 }
@@ -102,6 +111,14 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
                 {
                     if (this.elemSymbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Interface)
                         return InterfaceInfo.FromSymbol((INamedTypeSymbol)elemSymbol);
+
+                    return null;
+                }
+
+                public StructInfo AsStruct()
+                {
+                    if (this.elemSymbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Struct)
+                        return StructInfo.FromSymbol((INamedTypeSymbol)elemSymbol);
 
                     return null;
                 }

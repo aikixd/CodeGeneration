@@ -3,7 +3,6 @@ using Aikixd.CodeGeneration.CSharp;
 using Aikixd.CodeGeneration.CSharp.SearchPatterns;
 using Aikixd.CodeGeneration.CSharp.TypeInfo;
 using Aikixd.CodeGeneration.Test.CSharp.Bridge;
-using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -122,7 +121,7 @@ namespace Aikixd.CodeGeneration.Test.CSharp
             /*if (symbol.Name != "GenericClass")
                 return "";*/
 
-            var nfo = ClassInfo.FromSymbol(symbol);
+            var nfo = CodeGeneration.CSharp.TypeInfo.TypeInfo.FromSymbol(symbol);
 
             return 
                 string.Join(
@@ -131,8 +130,8 @@ namespace Aikixd.CodeGeneration.Test.CSharp
                     .Attributes
                     .Where(x => x.Type.Name == "TestAttribute")
                     .Select(
-                        x => x.PassedArguments.Count == 0 
-                        ? invokeTest(nfo.Name) 
+                        x => x.PassedArguments.Count == 0
+                        ? invokeTest(nfo.Name)
                         : invokeTest((string)x.PassedArguments[0])));
 
             string invokeTest(string name)

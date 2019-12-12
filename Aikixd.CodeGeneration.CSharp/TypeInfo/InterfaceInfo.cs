@@ -29,6 +29,14 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
             IEnumerable<MethodMemberInfo> methods,
             IEnumerable<AttributeInfo> attributes)
         {
+            if (typeInfo.Kind != TypeKind.Interface)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(typeInfo),
+                    typeInfo,
+                    "Provided type info is not an interface.");
+            }
+
             this.TypeInfo     = typeInfo;
             this.Accessabilty = accessabilty;
             this.Properties   = properties;
@@ -43,6 +51,9 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
 
         public static InterfaceInfo FromSymbol(INamedTypeSymbol symbol)
         {
+            if (symbol.TypeKind != Microsoft.CodeAnalysis.TypeKind.Interface)
+                return null;
+
             var props = new LinkedList<PropertyMemberInfo>();
             var methods = new LinkedList<MethodMemberInfo>();
 

@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFrameworks>net472</TargetFrameworks>
     <CodeAnalysisRuleSet>..\Solution.ruleset</CodeAnalysisRuleSet>
     <PackageOutputPath>C:\Dev\LocalPackages\Aikixd.CodeGeneration\</PackageOutputPath>
-    <Version>0.5.3-prerelease</Version>
+    <Version>0.6.4-prerelease</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <Authors>Dmitriy Sorkin</Authors>
@@ -19,12 +19,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build" Version="15.7.179" ExcludeAssets="runtime" />
-    <PackageReference Include="Microsoft.Build.Locator" Version="1.0.18" />
+    <PackageReference Include="Microsoft.Build.Locator" Version="1.2.6" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.7.179" ExcludeAssets="runtime" />
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="2.9.0-beta4-62809-06" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.9.0-beta4-62809-06" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="2.9.0-beta4-62809-06" />
-    <!--<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.8.2" />-->
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="3.4.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.4.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="3.4.0" />
   </ItemGroup>
 
   <ItemGroup>
