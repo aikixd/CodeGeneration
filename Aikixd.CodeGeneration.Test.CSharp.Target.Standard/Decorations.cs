@@ -10,4 +10,16 @@ namespace Aikixd.CodeGeneration.Test.CSharp.Target.Standard
     class ParamsAttributeDecoration
     {
     }
+
+    [Test]
+    [ArrayArg(new[] { "one", "two" })]
+    class ArrayAttributeDecoration
+    {
+    }
+
+    [Test]
+    [ArrayArg(NamedArray = new[] { "one", "two" })]
+    class NamedParamsAttributeDecoration
+    {
+    }
 }

@@ -35,6 +35,8 @@ namespace Aikixd.CodeGeneration.Test.CSharp.Bridge
         public ArrayArgAttribute(params string[] arr)
         {
         }
+
+        public string[] NamedArray { get; set; }
     }
 
     [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]

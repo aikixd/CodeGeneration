@@ -48,7 +48,7 @@ namespace Aikixd.CodeGeneration.CSharp.TypeInfo
                 TypeInfo.FromSymbol(attributeData.AttributeClass),
                 MethodMemberInfo.FromSymbol(attributeData.AttributeConstructor),
                 attributeData.ConstructorArguments.Select(getPassedArg).ToArray(),
-                attributeData.NamedArguments.ToDictionary(x => x.Key, x => x.Value.Value));
+                attributeData.NamedArguments.ToDictionary(x => x.Key, x => getPassedArg(x.Value)));
 
             object getPassedArg(TypedConstant arg)
             {

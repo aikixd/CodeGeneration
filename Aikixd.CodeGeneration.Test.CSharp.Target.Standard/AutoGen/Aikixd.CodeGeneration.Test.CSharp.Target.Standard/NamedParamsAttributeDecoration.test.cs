@@ -1,0 +1,1 @@
+Test NamedParamsAttributeDecoration: OK
